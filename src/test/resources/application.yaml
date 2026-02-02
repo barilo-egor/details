@@ -1,0 +1,5 @@
+spring:
+  application:
+    name: details-test
+  config:
+    import: ""
