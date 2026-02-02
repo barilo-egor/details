@@ -26,16 +26,22 @@ public class DetailsController extends ApiController {
         this.detailsMapper = detailsMapper;
     }
 
-    @PostMapping("/update-requisite")
-    public ResponseEntity<Void> updateRequisite(@RequestParam String requisite, @RequestParam Long pid) {
+    @PatchMapping("/{pid}/requisite")
+    public ResponseEntity<Void> updateRequisite(@PathVariable Long pid, @RequestParam String requisite) {
         detailsService.updateRequisiteByPid(requisite, pid);
         return ResponseEntity.ok().build();
     }
 
-    @GetMapping("/with-target-amount")
-    public List<DetailsDto> getWithNotEmptyTargetAmount() {
-        List<Details> details = detailsService.getWithNotEmptyTargetAmount();
-        return detailsMapper.toDtoList(details);
+    @GetMapping
+    public List<DetailsDto> findAll(@RequestParam(value = "detailIds", required = false) List<Long> pids,
+                                    @RequestParam(value = "hasTargetAmount", required = false, defaultValue = "false") boolean hasTargetAmount) {
+        if (pids != null && !pids.isEmpty()) {
+            return detailsMapper.toDtoList(detailsService.findAllByPids(pids));
+        }
+        if (hasTargetAmount) {
+            return detailsMapper.toDtoList(detailsService.getWithNotEmptyTargetAmount());
+        }
+        return List.of();
     }
 
     @GetMapping("/{pid}")
@@ -44,49 +50,44 @@ public class DetailsController extends ApiController {
                 .map(detailsMapper::toDto);
     }
 
-    @GetMapping("/by-ids")
-    public List<DetailsDto> findByIds(@RequestParam("detailIds") List<Long> detailIds) {
-        return detailsMapper.toDtoList(detailsService.findAllByPids(detailIds));
-
-    }
-
     @GetMapping("/target")
     public Optional<DetailsDto> getTarget(@RequestParam("detailIds") List<Long> detailIds,
-            @RequestParam("amount") Integer amount) {
+                                          @RequestParam("amount") Integer amount) {
         Optional<Details> details = detailsService.getTarget(detailIds, amount);
-        if(details.isEmpty()){
+        if (details.isEmpty()) {
             return Optional.empty();
         }
         return details.map(detailsMapper::toDto);
     }
 
-    @GetMapping("/order/{pid}")
-    public Integer getOrder(@PathVariable("pid") Long paymentTypeId) {
+    @GetMapping("/order/{paymentTypeId}")
+    public Integer getOrder(@PathVariable("paymentTypeId") Long paymentTypeId) {
         return detailsService.getOrder(paymentTypeId);
     }
 
-    @PostMapping("/order/update/{pid}")
-    public void updateOrder(@PathVariable("pid") Long paymentTypeId,@RequestParam("detailIds") List<Long> detailIds) {
+    @PutMapping("/order/{paymentTypeId}")
+    public void updateOrder(@PathVariable("paymentTypeId") Long paymentTypeId, @RequestBody List<Long> detailIds) {
         detailsService.updateOrder(paymentTypeId, detailIds);
     }
 
-    @PostMapping("/order/check/{pid}")
-    public void checkOrder(@PathVariable("pid") Long paymentTypeId,@RequestParam("detailIds") List<Long> detailIds) {
+    @PostMapping("/order/{paymentTypeId}/check")
+    public ResponseEntity<Void> checkOrder(@PathVariable Long paymentTypeId, @RequestBody List<Long> detailIds) {
         detailsService.checkOrder(paymentTypeId, detailIds);
+        return ResponseEntity.ok().build();
     }
 
-    @DeleteMapping("/order/{pid}")
-    public void removeOrder(@PathVariable("pid") Long paymentTypeId) {
+    @DeleteMapping("/order/{paymentTypeId}")
+    public void removeOrder(@PathVariable("paymentTypeId") Long paymentTypeId) {
         detailsService.removeOrder(paymentTypeId);
     }
 
-    @PostMapping("/save-reserve-amount")
-    public void saveReserveAmount(@RequestParam("pid") Long detailsId, @RequestParam("dealAmount") Integer dealAmount){
+    @PatchMapping("/{pid}/reserve")
+    public void saveReserveAmount(@PathVariable("pid") Long detailsId, @RequestParam("dealAmount") Integer dealAmount) {
         detailsService.saveReserveAmount(detailsId, dealAmount);
     }
 
-    @PostMapping("/confirm-payment")
-    public void confirmPayment(@RequestParam("pid") Long detailsId, @RequestParam("dealAmount") Integer dealAmount){
+    @PostMapping("/{pid}/confirm-payment")
+    public void confirmPayment(@PathVariable("pid") Long detailsId, @RequestParam("dealAmount") Integer dealAmount) {
         detailsService.confirmPayment(detailsId, dealAmount);
     }
 
