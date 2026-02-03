@@ -30,6 +30,4 @@ public class DetailsDto implements Serializable {
     private Integer rangeFrom;
 
     private Integer rangeTo;
-
-    private Long paymentTypeId;
 }
