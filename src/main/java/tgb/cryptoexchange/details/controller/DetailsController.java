@@ -7,6 +7,7 @@ import tgb.cryptoexchange.controller.ApiController;
 import tgb.cryptoexchange.details.dto.DetailsDto;
 import tgb.cryptoexchange.details.entity.Details;
 import tgb.cryptoexchange.details.interfaces.dto.DetailsMapper;
+import tgb.cryptoexchange.details.interfaces.dto.PaymentTypeDto;
 import tgb.cryptoexchange.details.interfaces.service.IDetailsService;
 
 import java.util.List;
@@ -60,19 +61,24 @@ public class DetailsController extends ApiController {
         return details.map(detailsMapper::toDto);
     }
 
+    @PostMapping("/non-target")
+    public String getNonTargetRequisite(@RequestBody PaymentTypeDto paymentTypeDto) {
+        return detailsService.getNotTargetRequisite(paymentTypeDto);
+    }
+
     @GetMapping("/order/{paymentTypeId}")
     public Integer getOrder(@PathVariable("paymentTypeId") Long paymentTypeId) {
         return detailsService.getOrder(paymentTypeId);
     }
 
-    @PutMapping("/order/{paymentTypeId}")
-    public void updateOrder(@PathVariable("paymentTypeId") Long paymentTypeId, @RequestBody List<Long> detailIds) {
-        detailsService.updateOrder(paymentTypeId, detailIds);
+    @PutMapping("/order}")
+    public void updateOrder(@RequestBody PaymentTypeDto paymentType) {
+        detailsService.updateOrder(paymentType);
     }
 
-    @PostMapping("/order/{paymentTypeId}/check")
-    public ResponseEntity<Void> checkOrder(@PathVariable Long paymentTypeId, @RequestBody List<Long> detailIds) {
-        detailsService.checkOrder(paymentTypeId, detailIds);
+    @PostMapping("/order/check")
+    public ResponseEntity<Void> checkOrder(@RequestBody PaymentTypeDto paymentType) {
+        detailsService.checkOrder(paymentType);
         return ResponseEntity.ok().build();
     }
 
@@ -89,6 +95,19 @@ public class DetailsController extends ApiController {
     @PostMapping("/{pid}/confirm-payment")
     public void confirmPayment(@PathVariable("pid") Long detailsId, @RequestParam("dealAmount") Integer dealAmount) {
         detailsService.confirmPayment(detailsId, dealAmount);
+    }
+
+    @PostMapping("/save")
+    public DetailsDto save(@RequestBody DetailsDto detailsDto) {
+        Details entity = detailsMapper.toEntity(detailsDto);
+        Details saved = detailsService.save(entity);
+        return detailsMapper.toDto(saved);
+    }
+
+    @PostMapping("/save-all")
+    public List<DetailsDto> save(@RequestBody List<DetailsDto> detailsDto) {
+        List<Details> entity = detailsDto.stream().map(detailsMapper::toEntity).toList();
+        return detailsService.saveAll(entity).stream().map(detailsMapper::toDto).toList();
     }
 
 }

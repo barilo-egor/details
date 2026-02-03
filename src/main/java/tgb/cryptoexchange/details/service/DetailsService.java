@@ -1,8 +1,12 @@
 package tgb.cryptoexchange.details.service;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.BooleanUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import tgb.cryptoexchange.details.entity.Details;
+import tgb.cryptoexchange.details.exception.BaseException;
+import tgb.cryptoexchange.details.interfaces.dto.PaymentTypeDto;
 import tgb.cryptoexchange.details.interfaces.service.IDetailsService;
 import tgb.cryptoexchange.details.repository.BaseRepository;
 import tgb.cryptoexchange.details.repository.DetailsRepository;
@@ -35,36 +39,36 @@ public class DetailsService extends BasePersistService<Details> implements IDeta
     }
 
     @Override
-    public void checkOrder(Long paymentTypePid, List<Long> detailsIds) {
+    public void checkOrder(PaymentTypeDto paymentType) {
         synchronized (this) {
-            Integer order = PAYMENT_REQUISITE_ORDER.get(paymentTypePid);
+            Integer order = PAYMENT_REQUISITE_ORDER.get(paymentType.getPid());
             if (Objects.isNull(order)) {
                 order = 0;
-                PAYMENT_REQUISITE_ORDER.put(paymentTypePid, order);
+                PAYMENT_REQUISITE_ORDER.put(paymentType.getPid(), order);
             } else {
-                List<Details> details = findAllByPids(detailsIds);
+                List<Details> details = findAllByPids(paymentType.getDetails());
                 long paymentTypeRequisitesSize = details.stream().filter(d->Boolean.TRUE.equals(d.getIsOn())).count();
                 if (order >= paymentTypeRequisitesSize) {
-                    PAYMENT_REQUISITE_ORDER.put(paymentTypePid, 0);
+                    PAYMENT_REQUISITE_ORDER.put(paymentType.getPid(), 0);
                 }
             }
         }
     }
 
     @Override
-    public void updateOrder(Long paymentTypePid, List<Long> detailsIds) {
+    public void updateOrder(PaymentTypeDto paymentType) {
         synchronized (this) {
-            Integer order = PAYMENT_REQUISITE_ORDER.get(paymentTypePid);
+            Integer order = PAYMENT_REQUISITE_ORDER.get(paymentType.getPid());
             if (Objects.isNull(order)) {
                 order = 0;
-                PAYMENT_REQUISITE_ORDER.put(paymentTypePid, order);
+                PAYMENT_REQUISITE_ORDER.put(paymentType.getPid(), order);
             } else {
-                List<Details> details = findAllByPids(detailsIds);
+                List<Details> details = findAllByPids(paymentType.getDetails());
                 long paymentTypeRequisitesSize = details.stream().filter(d->Boolean.TRUE.equals(d.getIsOn())).count();
                 if (order + 1 >= paymentTypeRequisitesSize)
-                    PAYMENT_REQUISITE_ORDER.put(paymentTypePid, 0);
+                    PAYMENT_REQUISITE_ORDER.put(paymentType.getPid(), 0);
                 else
-                    PAYMENT_REQUISITE_ORDER.put(paymentTypePid, order + 1);
+                    PAYMENT_REQUISITE_ORDER.put(paymentType.getPid(), order + 1);
             }
         }
     }
@@ -75,31 +79,31 @@ public class DetailsService extends BasePersistService<Details> implements IDeta
         }
     }
 
-//    @Override
-//    public String getNotTargetRequisite(PaymentType paymentType) {
-//        List<Details> Details = detailsRepository.getByPaymentType_Pid(paymentType.getPid());
-//        if (CollectionUtils.isEmpty(Details)) {
-//            throw new BaseException("Не установлены реквизиты для " + paymentType.getName() + ".");
-//        }
-//        if (BooleanUtils.isNotTrue(paymentType.getDynamicOn())) {
-//            return Details.stream()
-//                    .filter(requisite -> Objects.isNull(requisite.getTargetAmount())
-//                            || requisite.getTargetAmount() == 0)
-//                    .filter(requisite -> BooleanUtils.isTrue(requisite.getIsOn()))
-//                    .findFirst()
-//                    .orElseThrow(() -> new BaseException("Не найден ни один включенный реквизит"))
-//                    .getRequisite();
-//        }
-//        List<Details> turnedRequisites = Details.stream()
-//                .filter(requisite -> Objects.isNull(requisite.getTargetAmount()) || requisite.getTargetAmount() == 0)
-//                .filter(requisite -> BooleanUtils.isTrue(requisite.getIsOn()))
-//                .toList();
-//        if (CollectionUtils.isEmpty(turnedRequisites))
-//            throw new BaseException("Не найден ни один включенный реквизит.");
-//        Integer order = getOrder(paymentType.getPid());
-//        updateOrder(paymentType.getPid());
-//        return turnedRequisites.get(order).getRequisite();
-//    }
+    @Override
+    public String getNotTargetRequisite(PaymentTypeDto paymentType) {
+        List<Details> Details = detailsRepository.findAllByPidIn(paymentType.getDetails());
+        if (CollectionUtils.isEmpty(Details)) {
+            throw new BaseException("Не установлены реквизиты для " + paymentType.getName() + ".");
+        }
+        if (BooleanUtils.isNotTrue(paymentType.getIsDynamicOn())) {
+            return Details.stream()
+                    .filter(requisite -> Objects.isNull(requisite.getTargetAmount())
+                            || requisite.getTargetAmount() == 0)
+                    .filter(requisite -> BooleanUtils.isTrue(requisite.getIsOn()))
+                    .findFirst()
+                    .orElseThrow(() -> new BaseException("Не найден ни один включенный реквизит"))
+                    .getRequisite();
+        }
+        List<Details> turnedRequisites = Details.stream()
+                .filter(requisite -> Objects.isNull(requisite.getTargetAmount()) || requisite.getTargetAmount() == 0)
+                .filter(requisite -> BooleanUtils.isTrue(requisite.getIsOn()))
+                .toList();
+        if (CollectionUtils.isEmpty(turnedRequisites))
+            throw new BaseException("Не найден ни один включенный реквизит.");
+        Integer order = getOrder(paymentType.getPid());
+        updateOrder(paymentType);
+        return turnedRequisites.get(order).getRequisite();
+    }
 
     @Override
     public Optional<Details> getTarget(/*PaymentType paymentType*/ List<Long> detailIds, Integer amount) {
@@ -195,6 +199,11 @@ public class DetailsService extends BasePersistService<Details> implements IDeta
                 detailsRepository.save(details);
             }
         }
+    }
+
+    @Override
+    public List<Details> saveAll(List<Details> detailsDto) {
+        return detailsRepository.saveAll(detailsDto);
     }
 
 }

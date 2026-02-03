@@ -13,4 +13,6 @@ public interface DetailsMapper {
 
     List<DetailsDto> toDtoList(List<Details> entities);
 
+    Details toEntity(DetailsDto detailsDto);
+
 }
