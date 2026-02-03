@@ -19,9 +19,9 @@ public class DetailsService extends BasePersistService<Details> implements IDeta
 
     public static final Object TARGET_PAYMENT_REQUISITE_SYNCHRONIZE_OBJECT = new Object();
 
-    private final DetailsRepository detailsRepository;
-
     private final Map<Long, Integer> PAYMENT_REQUISITE_ORDER = new HashMap<>();
+
+    private final DetailsRepository detailsRepository;
 
     public DetailsService(DetailsRepository detailsRepository) {
         this.detailsRepository = detailsRepository;
@@ -47,7 +47,7 @@ public class DetailsService extends BasePersistService<Details> implements IDeta
                 PAYMENT_REQUISITE_ORDER.put(paymentType.getPid(), order);
             } else {
                 List<Details> details = findAllByPids(paymentType.getDetails());
-                long paymentTypeRequisitesSize = details.stream().filter(d->Boolean.TRUE.equals(d.getIsOn())).count();
+                long paymentTypeRequisitesSize = details.stream().filter(d -> Boolean.TRUE.equals(d.getIsOn())).count();
                 if (order >= paymentTypeRequisitesSize) {
                     PAYMENT_REQUISITE_ORDER.put(paymentType.getPid(), 0);
                 }
@@ -64,7 +64,7 @@ public class DetailsService extends BasePersistService<Details> implements IDeta
                 PAYMENT_REQUISITE_ORDER.put(paymentType.getPid(), order);
             } else {
                 List<Details> details = findAllByPids(paymentType.getDetails());
-                long paymentTypeRequisitesSize = details.stream().filter(d->Boolean.TRUE.equals(d.getIsOn())).count();
+                long paymentTypeRequisitesSize = details.stream().filter(d -> Boolean.TRUE.equals(d.getIsOn())).count();
                 if (order + 1 >= paymentTypeRequisitesSize)
                     PAYMENT_REQUISITE_ORDER.put(paymentType.getPid(), 0);
                 else
@@ -107,8 +107,8 @@ public class DetailsService extends BasePersistService<Details> implements IDeta
 
     @Override
     public Optional<Details> getTarget(/*PaymentType paymentType*/ List<Long> detailIds, Integer amount) {
-//        List<Details> targetDetailss =
-//                detailsRepository.getByPaymentTypeAndNotEmptyTargetAmount(paymentType.getPid());
+        //        List<Details> targetDetailss =
+        //                detailsRepository.getByPaymentTypeAndNotEmptyTargetAmount(paymentType.getPid());
         List<Details> targetDetails = detailsRepository.findAllByPidInAndTargetAmountNotEmpty(detailIds);
         if (!targetDetails.isEmpty()) {
             synchronized (TARGET_PAYMENT_REQUISITE_SYNCHRONIZE_OBJECT) {
@@ -128,30 +128,30 @@ public class DetailsService extends BasePersistService<Details> implements IDeta
     }
 
     @Override
-    public List<Details> findAllByPids(List<Long> detailIds){
+    public List<Details> findAllByPids(List<Long> detailIds) {
         return detailsRepository.findAllByPidIn(detailIds);
     }
-//
-//    @Override
-//    public List<Details> getByPaymentType(PaymentType paymentType) {
-//        return detailsRepository.getByPaymentType(paymentType);
-//    }
-//
-//
-//    @Override
-//    public List<Details> getByPaymentType_Pid(Long paymentTypePid) {
-//        return detailsRepository.getByPaymentType_Pid(paymentTypePid);
-//    }
-//
-//    @Override
-//    public PaymentType getPaymentTypeByPid(Long pid) {
-//        return detailsRepository.getPaymentTypeByPid(pid);
-//    }
-//
-//    @Override
-//    public Integer countByPaymentTypePidAndIsOn(Long paymentTypePid) {
-//        return detailsRepository.countByPaymentTypePidAndIsOn(paymentTypePid);
-//    }
+    //
+    //    @Override
+    //    public List<Details> getByPaymentType(PaymentType paymentType) {
+    //        return detailsRepository.getByPaymentType(paymentType);
+    //    }
+    //
+    //
+    //    @Override
+    //    public List<Details> getByPaymentType_Pid(Long paymentTypePid) {
+    //        return detailsRepository.getByPaymentType_Pid(paymentTypePid);
+    //    }
+    //
+    //    @Override
+    //    public PaymentType getPaymentTypeByPid(Long pid) {
+    //        return detailsRepository.getPaymentTypeByPid(pid);
+    //    }
+    //
+    //    @Override
+    //    public Integer countByPaymentTypePidAndIsOn(Long paymentTypePid) {
+    //        return detailsRepository.countByPaymentTypePidAndIsOn(paymentTypePid);
+    //    }
 
     @Override
     public void updateRequisiteByPid(String requisite, Long pid) {
@@ -174,7 +174,7 @@ public class DetailsService extends BasePersistService<Details> implements IDeta
     }
 
     @Override
-    public void saveReserveAmount(Long detailsId, Integer dealAmount){
+    public void saveReserveAmount(Long detailsId, Integer dealAmount) {
         synchronized (TARGET_PAYMENT_REQUISITE_SYNCHRONIZE_OBJECT) {
             Optional<Details> maybeDetails = findByIdOptional(detailsId);
             if (maybeDetails.isPresent()) {
@@ -187,7 +187,7 @@ public class DetailsService extends BasePersistService<Details> implements IDeta
     }
 
     @Override
-    public void confirmPayment(Long detailsId, Integer dealAmount){
+    public void confirmPayment(Long detailsId, Integer dealAmount) {
         synchronized (TARGET_PAYMENT_REQUISITE_SYNCHRONIZE_OBJECT) {
             Optional<Details> maybeDetails = findByIdOptional(detailsId);
             if (maybeDetails.isPresent()) {
