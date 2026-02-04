@@ -2,6 +2,7 @@ package tgb.cryptoexchange.details.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Profile;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import tgb.cryptoexchange.details.kafka.DetailsResponse;
@@ -10,6 +11,7 @@ import java.util.UUID;
 
 @Service
 @Slf4j
+@Profile("!kafka-disabled")
 public class DetailsResponseService {
 
     private final KafkaTemplate<String, DetailsResponse> detailsResponseKafkaTemplate;

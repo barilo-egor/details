@@ -1,6 +1,7 @@
 package tgb.cryptoexchange.details.controller;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,7 +19,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/api/details")
+@RequestMapping("/details")
 @Slf4j
 public class DetailsController extends ApiController {
 
@@ -28,7 +29,8 @@ public class DetailsController extends ApiController {
 
     private final DetailsMapper detailsMapper;
 
-    public DetailsController(IDetailsService detailsService, DetailsResponseService detailsResponseService,
+    public DetailsController(IDetailsService detailsService,
+            @Autowired(required = false) DetailsResponseService detailsResponseService,
             DetailsMapper detailsMapper) {
         this.detailsService = detailsService;
         this.detailsResponseService = detailsResponseService;
@@ -78,7 +80,7 @@ public class DetailsController extends ApiController {
                 dto),
                 HttpStatus.OK
         )).orElseGet(() -> new ResponseEntity<>(ApiResponse.error(
-                "Не найден реквизит"),
+                "Не найден целевой реквизит"),
                 HttpStatus.NOT_FOUND
         ));
     }
@@ -111,7 +113,9 @@ public class DetailsController extends ApiController {
             details.setPid(id);
             return details;
         }).toList());
-        detailsResponseService.process(new DetailsResponse(detailIds));
+        if(detailsResponseService!=null) {
+            detailsResponseService.process(new DetailsResponse(detailIds));
+        }
         return ResponseEntity.ok().build();
     }
 

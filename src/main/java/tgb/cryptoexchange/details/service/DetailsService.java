@@ -112,14 +112,14 @@ public class DetailsService extends BasePersistService<Details> implements IDeta
         List<Details> targetDetails = detailsRepository.findAllByPidInAndTargetAmountNotEmpty(detailIds);
         if (!targetDetails.isEmpty()) {
             synchronized (TARGET_PAYMENT_REQUISITE_SYNCHRONIZE_OBJECT) {
-                for (Details Details : targetDetails) {
-                    int targetAmount = Details.getTargetAmount();
-                    int receiveAmount = Objects.nonNull(Details.getReceivedAmount()) ? Details.getReceivedAmount() : 0;
-                    int reserveAmount = Objects.nonNull(Details.getReserveAmount()) ? Details.getReserveAmount() : 0;
-                    if (targetAmount - receiveAmount - reserveAmount >= amount && Details.isInRange(amount)) {
-                        Details.setReserveAmount(reserveAmount + amount);
-                        detailsRepository.save(Details);
-                        return Optional.of(Details);
+                for (Details details : targetDetails) {
+                    int targetAmount = details.getTargetAmount();
+                    int receiveAmount = Objects.nonNull(details.getReceivedAmount()) ? details.getReceivedAmount() : 0;
+                    int reserveAmount = Objects.nonNull(details.getReserveAmount()) ? details.getReserveAmount() : 0;
+                    if (targetAmount - receiveAmount - reserveAmount >= amount && details.isInRange(amount)) {
+                        details.setReserveAmount(reserveAmount + amount);
+                        detailsRepository.save(details);
+                        return Optional.of(details);
                     }
                 }
             }
