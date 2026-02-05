@@ -1,13 +1,18 @@
 package tgb.cryptoexchange.details.repository;
 
+import jakarta.persistence.LockModeType;
+import jakarta.persistence.QueryHint;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.jpa.repository.QueryHints;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import tgb.cryptoexchange.details.entity.Details;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 @Transactional
@@ -25,4 +30,12 @@ public interface DetailsRepository extends BaseRepository<Details> {
 
     List<Details> findAllByPidIn(List<Long> pids);
 
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    // Тайм-аут 5000 мс (5 секунд) для ожидания освобождения строки
+    @QueryHints({@QueryHint(name = "jakarta.persistence.lock.timeout", value = "5000")})
+    @Query("SELECT d FROM Details d " +
+            "WHERE d.pid IN :ids " +
+            "AND (d.targetAmount IS NULL OR d.targetAmount = 0) " +
+            "ORDER BY d.lastAccessedAt ASC LIMIT 1")
+    Optional<Details> findOldestAvailableDetail(@Param("ids") List<Long> ids);
 }

@@ -1,5 +1,6 @@
 package tgb.cryptoexchange.details.controller;
 
+import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -17,6 +18,8 @@ import tgb.cryptoexchange.web.ApiResponse;
 
 import java.util.List;
 import java.util.Optional;
+
+import static tgb.cryptoexchange.web.ApiResponse.Error.ErrorCode.ENTITY_NOT_FOUND;
 
 @RestController
 @RequestMapping("/details")
@@ -87,8 +90,12 @@ public class DetailsController extends ApiController {
 
     @PostMapping("/non-target")
     public ResponseEntity<ApiResponse<String>> getNonTargetRequisite(@RequestBody PaymentTypeDto paymentTypeDto) {
-        return new ResponseEntity<>(ApiResponse.success(detailsService.getNotTargetRequisite(paymentTypeDto)),
-                HttpStatus.OK);
+        try {
+            return new ResponseEntity<>(ApiResponse.success(detailsService.getNotTargetRequisite(paymentTypeDto)),
+                    HttpStatus.OK);
+        }catch (EntityNotFoundException e){
+            return new ResponseEntity<>(ApiResponse.error(e.getMessage()), HttpStatus.NOT_FOUND);
+        }
     }
 
     @PostMapping("/save")
@@ -125,28 +132,28 @@ public class DetailsController extends ApiController {
         return ResponseEntity.ok().build();
     }
 
-    @GetMapping("/order/{paymentTypeId}")
-    public ResponseEntity<ApiResponse<Integer>> getOrder(@PathVariable Long paymentTypeId) {
-        return new ResponseEntity<>(ApiResponse.success(detailsService.getOrder(paymentTypeId)), HttpStatus.OK);
-    }
+//    @GetMapping("/order/{paymentTypeId}")
+//    public ResponseEntity<ApiResponse<Integer>> getOrder(@PathVariable Long paymentTypeId) {
+//        return new ResponseEntity<>(ApiResponse.success(detailsService.getOrder(paymentTypeId)), HttpStatus.OK);
+//    }
 
-    @PostMapping("/order/check")
-    public ResponseEntity<Void> checkOrder(@RequestBody PaymentTypeDto paymentType) {
-        detailsService.checkOrder(paymentType);
-        return ResponseEntity.ok().build();
-    }
+//    @PostMapping("/order/check")
+//    public ResponseEntity<Void> checkOrder(@RequestBody PaymentTypeDto paymentType) {
+//        detailsService.checkOrder(paymentType);
+//        return ResponseEntity.ok().build();
+//    }
 
-    @PutMapping("/order")
-    public ResponseEntity<Void> updateOrder(@RequestBody PaymentTypeDto paymentType) {
-        detailsService.updateOrder(paymentType);
-        return ResponseEntity.ok().build();
-    }
+//    @PutMapping("/order")
+//    public ResponseEntity<Void> updateOrder(@RequestBody PaymentTypeDto paymentType) {
+//        detailsService.updateOrder(paymentType);
+//        return ResponseEntity.ok().build();
+//    }
 
-    @DeleteMapping("/order/{paymentTypeId}")
-    public ResponseEntity<Void> removeOrder(@PathVariable Long paymentTypeId) {
-        detailsService.removeOrder(paymentTypeId);
-        return ResponseEntity.ok().build();
-    }
+//    @DeleteMapping("/order/{paymentTypeId}")
+//    public ResponseEntity<Void> removeOrder(@PathVariable Long paymentTypeId) {
+//        detailsService.removeOrder(paymentTypeId);
+//        return ResponseEntity.ok().build();
+//    }
 
     @PatchMapping("/{pid}/reserve")
     public ResponseEntity<Void> saveReserveAmount(@PathVariable("pid") Long detailsId,

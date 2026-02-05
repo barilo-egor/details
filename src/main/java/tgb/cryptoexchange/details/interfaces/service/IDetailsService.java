@@ -22,13 +22,13 @@ public interface IDetailsService extends IBasePersistService<Details> {
 
     List<Details> findAllByPids(List<Long> detailIds);
 
-    Integer getOrder(Long paymentTypeId);
+//    Integer getOrder(Long paymentTypeId);
 
-    void updateOrder(PaymentTypeDto paymentType);
-
-    void checkOrder(PaymentTypeDto paymentType);
-
-    void removeOrder(Long paymentTypeId);
+//    void updateOrder(PaymentTypeDto paymentType);
+//
+//    void checkOrder(PaymentTypeDto paymentType);
+//
+//    void removeOrder(Long paymentTypeId);
 
     void saveReserveAmount(Long detailsId, Integer dealAmount);
 

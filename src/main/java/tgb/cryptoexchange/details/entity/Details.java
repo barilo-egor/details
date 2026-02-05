@@ -2,9 +2,12 @@ package tgb.cryptoexchange.details.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import lombok.*;
 import tgb.cryptoexchange.details.exception.BaseException;
+
+import java.time.Instant;
 
 @Entity
 @Table(name = "Details")
@@ -34,6 +37,15 @@ public class Details extends BasePersist {
     private Integer rangeFrom;
 
     private Integer rangeTo;
+
+    private Instant lastAccessedAt;
+
+    @PrePersist
+    protected void onCreate() {
+        if (this.lastAccessedAt == null) {
+            this.lastAccessedAt = Instant.now();
+        }
+    }
 
     //Вообще не используется нигде
     //    @Builder.Default

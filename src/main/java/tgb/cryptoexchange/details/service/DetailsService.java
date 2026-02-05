@@ -1,9 +1,9 @@
 package tgb.cryptoexchange.details.service;
 
+import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.BooleanUtils;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 import tgb.cryptoexchange.details.entity.Details;
 import tgb.cryptoexchange.details.exception.BaseException;
 import tgb.cryptoexchange.details.interfaces.dto.PaymentTypeDto;
@@ -11,6 +11,7 @@ import tgb.cryptoexchange.details.interfaces.service.IDetailsService;
 import tgb.cryptoexchange.details.repository.BaseRepository;
 import tgb.cryptoexchange.details.repository.DetailsRepository;
 
+import java.time.Instant;
 import java.util.*;
 
 @Service
@@ -27,51 +28,51 @@ public class DetailsService extends BasePersistService<Details> implements IDeta
         this.detailsRepository = detailsRepository;
     }
 
-    public Integer getOrder(Long paymentTypePid) {
-        synchronized (this) {
-            Integer order = PAYMENT_REQUISITE_ORDER.get(paymentTypePid);
-            if (Objects.isNull(order)) {
-                order = 0;
-                PAYMENT_REQUISITE_ORDER.put(paymentTypePid, order);
-            }
-            return order;
-        }
-    }
+    //    public Integer getOrder(Long paymentTypePid) {
+    //        synchronized (this) {
+    //            Integer order = PAYMENT_REQUISITE_ORDER.get(paymentTypePid);
+    //            if (Objects.isNull(order)) {
+    //                order = 0;
+    //                PAYMENT_REQUISITE_ORDER.put(paymentTypePid, order);
+    //            }
+    //            return order;
+    //        }
+    //    }
 
-    @Override
-    public void checkOrder(PaymentTypeDto paymentType) {
-        synchronized (this) {
-            Integer order = PAYMENT_REQUISITE_ORDER.get(paymentType.getPid());
-            if (Objects.isNull(order)) {
-                order = 0;
-                PAYMENT_REQUISITE_ORDER.put(paymentType.getPid(), order);
-            } else {
-                List<Details> details = findAllByPids(paymentType.getDetails());
-                long paymentTypeRequisitesSize = details.stream().filter(d -> Boolean.TRUE.equals(d.getIsOn())).count();
-                if (order >= paymentTypeRequisitesSize) {
-                    PAYMENT_REQUISITE_ORDER.put(paymentType.getPid(), 0);
-                }
-            }
-        }
-    }
+    //    @Override
+    //    public void checkOrder(PaymentTypeDto paymentType) {
+    //        synchronized (this) {
+    //            Integer order = PAYMENT_REQUISITE_ORDER.get(paymentType.getPid());
+    //            if (Objects.isNull(order)) {
+    //                order = 0;
+    //                PAYMENT_REQUISITE_ORDER.put(paymentType.getPid(), order);
+    //            } else {
+    //                List<Details> details = findAllByPids(paymentType.getDetails());
+    //                long paymentTypeRequisitesSize = details.stream().filter(d -> Boolean.TRUE.equals(d.getIsOn())).count();
+    //                if (order >= paymentTypeRequisitesSize) {
+    //                    PAYMENT_REQUISITE_ORDER.put(paymentType.getPid(), 0);
+    //                }
+    //            }
+    //        }
+    //    }
 
-    @Override
-    public void updateOrder(PaymentTypeDto paymentType) {
-        synchronized (this) {
-            Integer order = PAYMENT_REQUISITE_ORDER.get(paymentType.getPid());
-            if (Objects.isNull(order)) {
-                order = 0;
-                PAYMENT_REQUISITE_ORDER.put(paymentType.getPid(), order);
-            } else {
-                List<Details> details = findAllByPids(paymentType.getDetails());
-                long paymentTypeRequisitesSize = details.stream().filter(d -> Boolean.TRUE.equals(d.getIsOn())).count();
-                if (order + 1 >= paymentTypeRequisitesSize)
-                    PAYMENT_REQUISITE_ORDER.put(paymentType.getPid(), 0);
-                else
-                    PAYMENT_REQUISITE_ORDER.put(paymentType.getPid(), order + 1);
-            }
-        }
-    }
+    //    @Override
+    //    public void updateOrder(PaymentTypeDto paymentType) {
+    //        synchronized (this) {
+    //            Integer order = PAYMENT_REQUISITE_ORDER.get(paymentType.getPid());
+    //            if (Objects.isNull(order)) {
+    //                order = 0;
+    //                PAYMENT_REQUISITE_ORDER.put(paymentType.getPid(), order);
+    //            } else {
+    //                List<Details> details = findAllByPids(paymentType.getDetails());
+    //                long paymentTypeRequisitesSize = details.stream().filter(d -> Boolean.TRUE.equals(d.getIsOn())).count();
+    //                if (order + 1 >= paymentTypeRequisitesSize)
+    //                    PAYMENT_REQUISITE_ORDER.put(paymentType.getPid(), 0);
+    //                else
+    //                    PAYMENT_REQUISITE_ORDER.put(paymentType.getPid(), order + 1);
+    //            }
+    //        }
+    //    }
 
     public void removeOrder(Long paymentTypePid) {
         synchronized (this) {
@@ -80,29 +81,15 @@ public class DetailsService extends BasePersistService<Details> implements IDeta
     }
 
     @Override
+    @Transactional
     public String getNotTargetRequisite(PaymentTypeDto paymentType) {
-        List<Details> Details = detailsRepository.findAllByPidIn(paymentType.getDetails());
-        if (CollectionUtils.isEmpty(Details)) {
-            throw new BaseException("Не установлены реквизиты для " + paymentType.getName() + ".");
+        Optional<Details> detailsOptional = detailsRepository.findOldestAvailableDetail(paymentType.getDetails());
+        if (detailsOptional.isEmpty()) {
+            throw new EntityNotFoundException("Не найден ни один подходящий реквизит для " + paymentType.getName() + ".");
         }
-        if (BooleanUtils.isNotTrue(paymentType.getIsDynamicOn())) {
-            return Details.stream()
-                    .filter(requisite -> Objects.isNull(requisite.getTargetAmount())
-                            || requisite.getTargetAmount() == 0)
-                    .filter(requisite -> BooleanUtils.isTrue(requisite.getIsOn()))
-                    .findFirst()
-                    .orElseThrow(() -> new BaseException("Не найден ни один включенный реквизит"))
-                    .getRequisite();
-        }
-        List<Details> turnedRequisites = Details.stream()
-                .filter(requisite -> Objects.isNull(requisite.getTargetAmount()) || requisite.getTargetAmount() == 0)
-                .filter(requisite -> BooleanUtils.isTrue(requisite.getIsOn()))
-                .toList();
-        if (CollectionUtils.isEmpty(turnedRequisites))
-            throw new BaseException("Не найден ни один включенный реквизит.");
-        Integer order = getOrder(paymentType.getPid());
-        updateOrder(paymentType);
-        return turnedRequisites.get(order).getRequisite();
+        Details details = detailsOptional.get();
+        details.setLastAccessedAt(Instant.now());
+        return details.getRequisite();
     }
 
     @Override
