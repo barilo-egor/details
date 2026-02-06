@@ -4,8 +4,9 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import tgb.cryptoexchange.details.dto.DetailsDto;
 import tgb.cryptoexchange.details.entity.Details;
-import tgb.cryptoexchange.details.exception.BaseException;
+import tgb.cryptoexchange.details.interfaces.dto.DetailsMapper;
 import tgb.cryptoexchange.details.interfaces.dto.PaymentTypeDto;
 import tgb.cryptoexchange.details.interfaces.service.IDetailsService;
 import tgb.cryptoexchange.details.repository.BaseRepository;
@@ -18,14 +19,15 @@ import java.util.*;
 @Slf4j
 public class DetailsService extends BasePersistService<Details> implements IDetailsService {
 
-    public static final Object TARGET_PAYMENT_REQUISITE_SYNCHRONIZE_OBJECT = new Object();
-
     private final Map<Long, Integer> PAYMENT_REQUISITE_ORDER = new HashMap<>();
 
     private final DetailsRepository detailsRepository;
 
-    public DetailsService(DetailsRepository detailsRepository) {
+    private final DetailsMapper mapper;
+
+    public DetailsService(DetailsRepository detailsRepository, DetailsMapper mapper) {
         this.detailsRepository = detailsRepository;
+        this.mapper = mapper;
     }
 
     //    public Integer getOrder(Long paymentTypePid) {
@@ -74,18 +76,19 @@ public class DetailsService extends BasePersistService<Details> implements IDeta
     //        }
     //    }
 
-    public void removeOrder(Long paymentTypePid) {
-        synchronized (this) {
-            PAYMENT_REQUISITE_ORDER.remove(paymentTypePid);
-        }
-    }
+    //    public void removeOrder(Long paymentTypePid) {
+    //        synchronized (this) {
+    //            PAYMENT_REQUISITE_ORDER.remove(paymentTypePid);
+    //        }
+    //    }
 
     @Override
     @Transactional
     public String getNotTargetRequisite(PaymentTypeDto paymentType) {
         Optional<Details> detailsOptional = detailsRepository.findOldestAvailableDetail(paymentType.getDetails());
         if (detailsOptional.isEmpty()) {
-            throw new EntityNotFoundException("Не найден ни один подходящий реквизит для " + paymentType.getName() + ".");
+            throw new EntityNotFoundException(
+                    "Не найден ни один подходящий реквизит для " + paymentType.getName() + ".");
         }
         Details details = detailsOptional.get();
         details.setLastAccessedAt(Instant.now());
@@ -93,21 +96,19 @@ public class DetailsService extends BasePersistService<Details> implements IDeta
     }
 
     @Override
-    public Optional<Details> getTarget(/*PaymentType paymentType*/ List<Long> detailIds, Integer amount) {
-        //        List<Details> targetDetailss =
-        //                detailsRepository.getByPaymentTypeAndNotEmptyTargetAmount(paymentType.getPid());
-        List<Details> targetDetails = detailsRepository.findAllByPidInAndTargetAmountNotEmpty(detailIds);
+    @Transactional
+    public Optional<Details> getTarget(List<Long> detailIds, Integer amount) {
+        List<Long> sortedDetails = detailIds.stream().distinct().sorted().toList();
+        List<Details> targetDetails = detailsRepository.findAllByPidInAndTargetAmountNotEmpty(sortedDetails);
         if (!targetDetails.isEmpty()) {
-            synchronized (TARGET_PAYMENT_REQUISITE_SYNCHRONIZE_OBJECT) {
-                for (Details details : targetDetails) {
-                    int targetAmount = details.getTargetAmount();
-                    int receiveAmount = Objects.nonNull(details.getReceivedAmount()) ? details.getReceivedAmount() : 0;
-                    int reserveAmount = Objects.nonNull(details.getReserveAmount()) ? details.getReserveAmount() : 0;
-                    if (targetAmount - receiveAmount - reserveAmount >= amount && details.isInRange(amount)) {
-                        details.setReserveAmount(reserveAmount + amount);
-                        detailsRepository.save(details);
-                        return Optional.of(details);
-                    }
+            for (Details details : targetDetails) {
+                int targetAmount = details.getTargetAmount();
+                int receiveAmount = Objects.nonNull(details.getReceivedAmount()) ? details.getReceivedAmount() : 0;
+                int reserveAmount = Objects.nonNull(details.getReserveAmount()) ? details.getReserveAmount() : 0;
+                if (targetAmount - receiveAmount - reserveAmount >= amount && details.isInRange(amount)) {
+                    details.setReserveAmount(reserveAmount + amount);
+                    detailsRepository.save(details);
+                    return Optional.of(details);
                 }
             }
         }
@@ -161,36 +162,45 @@ public class DetailsService extends BasePersistService<Details> implements IDeta
     }
 
     @Override
+    @Transactional
     public void saveReserveAmount(Long detailsId, Integer dealAmount) {
-        synchronized (TARGET_PAYMENT_REQUISITE_SYNCHRONIZE_OBJECT) {
-            Optional<Details> maybeDetails = findByIdOptional(detailsId);
-            if (maybeDetails.isPresent()) {
-                Details details = maybeDetails.get();
-                int reserveAmount = Objects.isNull(details.getReserveAmount()) ? 0 : details.getReserveAmount();
-                details.setReserveAmount(reserveAmount - dealAmount);
-                detailsRepository.save(details);
-            }
+        Optional<Details> maybeDetails = findByIdOptional(detailsId);
+        if (maybeDetails.isPresent()) {
+            Details details = maybeDetails.get();
+            int reserveAmount = Objects.isNull(details.getReserveAmount()) ? 0 : details.getReserveAmount();
+            details.setReserveAmount(reserveAmount - dealAmount);
+            detailsRepository.save(details);
         }
     }
 
     @Override
+    @Transactional
     public void confirmPayment(Long detailsId, Integer dealAmount) {
-        synchronized (TARGET_PAYMENT_REQUISITE_SYNCHRONIZE_OBJECT) {
-            Optional<Details> maybeDetails = findByIdOptional(detailsId);
-            if (maybeDetails.isPresent()) {
-                Details details = maybeDetails.get();
-                int reserveAmount = Objects.isNull(details.getReserveAmount()) ? 0 : details.getReserveAmount();
-                int receivedAmount = Objects.isNull(details.getReceivedAmount()) ? 0 : details.getReceivedAmount();
-                details.setReserveAmount(reserveAmount - dealAmount);
-                details.setReceivedAmount(receivedAmount + dealAmount);
-                detailsRepository.save(details);
-            }
+        Optional<Details> maybeDetails = findByIdOptional(detailsId);
+        if (maybeDetails.isPresent()) {
+            Details details = maybeDetails.get();
+            int reserveAmount = Objects.isNull(details.getReserveAmount()) ? 0 : details.getReserveAmount();
+            int receivedAmount = Objects.isNull(details.getReceivedAmount()) ? 0 : details.getReceivedAmount();
+            details.setReserveAmount(reserveAmount - dealAmount);
+            details.setReceivedAmount(receivedAmount + dealAmount);
+            detailsRepository.save(details);
         }
     }
 
     @Override
     public List<Details> saveAll(List<Details> detailsDto) {
         return detailsRepository.saveAll(detailsDto);
+    }
+
+    @Transactional
+    public void patchDetails(Long pid, DetailsDto dto) {
+        Optional<Details> entity = detailsRepository.findById(pid);
+        if (entity.isEmpty()) {
+            throw new EntityNotFoundException("Не найден details " + pid + ".");
+        }
+        Details details = entity.get();
+        mapper.updateEntityFromDto(dto, details);
+        detailsRepository.save(details);
     }
 
 }

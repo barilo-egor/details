@@ -2,11 +2,13 @@ package tgb.cryptoexchange.details.repository;
 
 import jakarta.persistence.LockModeType;
 import jakarta.persistence.QueryHint;
+import jakarta.validation.constraints.NotNull;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.jpa.repository.QueryHints;
 import org.springframework.data.repository.query.Param;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import tgb.cryptoexchange.details.entity.Details;
@@ -26,16 +28,24 @@ public interface DetailsRepository extends BaseRepository<Details> {
     List<Details> getWithNotEmptyTargetAmount();
 
     @Query("from Details d where d.pid in :pids and d.targetAmount is not null and d.targetAmount > 0")
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @QueryHints({@QueryHint(name = "jakarta.persistence.lock.timeout", value = "5000")})
     List<Details> findAllByPidInAndTargetAmountNotEmpty(@Param("pids") List<Long> pids);
 
     List<Details> findAllByPidIn(List<Long> pids);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
-    // Тайм-аут 5000 мс (5 секунд) для ожидания освобождения строки
+    // Тайм-аут 5 секунд для ожидания освобождения строки
     @QueryHints({@QueryHint(name = "jakarta.persistence.lock.timeout", value = "5000")})
     @Query("SELECT d FROM Details d " +
             "WHERE d.pid IN :ids " +
             "AND (d.targetAmount IS NULL OR d.targetAmount = 0) " +
             "ORDER BY d.lastAccessedAt ASC LIMIT 1")
     Optional<Details> findOldestAvailableDetail(@Param("ids") List<Long> ids);
+
+    @Override
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @QueryHints({@QueryHint(name = "jakarta.persistence.lock.timeout", value = "5000")})
+    @NonNull
+    Optional<Details> findById(@NonNull Long id);
 }

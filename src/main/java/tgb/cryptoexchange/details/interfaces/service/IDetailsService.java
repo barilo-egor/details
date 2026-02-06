@@ -1,6 +1,7 @@
 package tgb.cryptoexchange.details.interfaces.service;
 
 import org.springframework.web.bind.annotation.RequestParam;
+import tgb.cryptoexchange.details.dto.DetailsDto;
 import tgb.cryptoexchange.details.entity.Details;
 import tgb.cryptoexchange.details.interfaces.IBasePersistService;
 import tgb.cryptoexchange.details.interfaces.dto.PaymentTypeDto;
@@ -35,5 +36,7 @@ public interface IDetailsService extends IBasePersistService<Details> {
     void confirmPayment(Long detailsId, Integer dealAmount);
 
     List<Details> saveAll(List<Details> detailsDto);
+
+    void patchDetails(Long pid, DetailsDto dto);
 
 }

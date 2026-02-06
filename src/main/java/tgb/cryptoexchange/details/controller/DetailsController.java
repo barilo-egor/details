@@ -126,9 +126,9 @@ public class DetailsController extends ApiController {
         return ResponseEntity.ok().build();
     }
 
-    @PatchMapping("/{pid}/requisite")
-    public ResponseEntity<Void> updateRequisite(@PathVariable Long pid, @RequestParam String requisite) {
-        detailsService.updateRequisiteByPid(requisite, pid);
+    @PatchMapping("/{pid}")
+    public ResponseEntity<Void> updateDetails(@PathVariable Long pid, @RequestBody DetailsDto dto) {
+        detailsService.patchDetails(pid, dto);
         return ResponseEntity.ok().build();
     }
 
