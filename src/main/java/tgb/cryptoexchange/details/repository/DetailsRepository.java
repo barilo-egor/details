@@ -35,8 +35,9 @@ public interface DetailsRepository extends BaseRepository<Details> {
     List<Details> findAllByPidIn(List<Long> pids);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
-    // Тайм-аут 5 секунд для ожидания освобождения строки
-    @QueryHints({@QueryHint(name = "jakarta.persistence.lock.timeout", value = "5000")})
+    @QueryHints({
+            //Skip lock пропустит уде заблокированную строку и возьмет следующую
+            @QueryHint(name = "jakarta.persistence.lock.timeout", value = "-2")})
     @Query("SELECT d FROM Details d " +
             "WHERE d.pid IN :ids " +
             "AND (d.targetAmount IS NULL OR d.targetAmount = 0) " +
