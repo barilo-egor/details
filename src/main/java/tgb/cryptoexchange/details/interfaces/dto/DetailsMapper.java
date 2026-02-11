@@ -16,8 +16,10 @@ public interface DetailsMapper {
 
     List<DetailsDto> toDtoList(List<Details> entities);
 
+    @Mapping(target = "lastAccessedAt", ignore = true)
     Details toEntity(DetailsDto detailsDto);
 
+    @Mapping(target = "lastAccessedAt", ignore = true)
     void updateEntityFromDto(DetailsDto dto, @MappingTarget Details entity);
 
 }

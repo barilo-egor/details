@@ -19,8 +19,6 @@ import tgb.cryptoexchange.web.ApiResponse;
 import java.util.List;
 import java.util.Optional;
 
-import static tgb.cryptoexchange.web.ApiResponse.Error.ErrorCode.ENTITY_NOT_FOUND;
-
 @RestController
 @RequestMapping("/details")
 @Slf4j
@@ -65,37 +63,21 @@ public class DetailsController extends ApiController {
 
     @GetMapping("/{pid}")
     public ResponseEntity<ApiResponse<DetailsDto>> findById(@PathVariable Long pid) {
-        Optional<DetailsDto> details = detailsService.findByIdOptional(pid).map(detailsMapper::toDto);
-        return details.map(dto -> new ResponseEntity<>(ApiResponse.success(
-                dto),
-                HttpStatus.OK
-        )).orElseGet(() -> new ResponseEntity<>(ApiResponse.error(
-                "Не найден реквизит"),
-                HttpStatus.NOT_FOUND
-        ));
+        DetailsDto details = detailsMapper.toDto(detailsService.findById(pid));
+        return new ResponseEntity<>(ApiResponse.success(details), HttpStatus.OK);
     }
 
     @GetMapping("/target")
     public ResponseEntity<ApiResponse<DetailsDto>> getTarget(@RequestParam("detailIds") List<Long> detailIds,
             @RequestParam("amount") Integer amount) {
-        Optional<DetailsDto> details = detailsService.getTarget(detailIds, amount).map(detailsMapper::toDto);
-        return details.map(dto -> new ResponseEntity<>(ApiResponse.success(
-                dto),
-                HttpStatus.OK
-        )).orElseGet(() -> new ResponseEntity<>(ApiResponse.error(
-                "Не найден целевой реквизит"),
-                HttpStatus.NOT_FOUND
-        ));
+        DetailsDto details = detailsMapper.toDto(detailsService.getTarget(detailIds, amount));
+        return new ResponseEntity<>(ApiResponse.success(details), HttpStatus.OK);
     }
 
     @PostMapping("/non-target")
     public ResponseEntity<ApiResponse<String>> getNonTargetRequisite(@RequestBody PaymentTypeDto paymentTypeDto) {
-        try {
-            return new ResponseEntity<>(ApiResponse.success(detailsService.getNotTargetRequisite(paymentTypeDto)),
-                    HttpStatus.OK);
-        }catch (EntityNotFoundException e){
-            return new ResponseEntity<>(ApiResponse.error(e.getMessage()), HttpStatus.NOT_FOUND);
-        }
+        return new ResponseEntity<>(ApiResponse.success(detailsService.getNotTargetRequisite(paymentTypeDto)),
+                HttpStatus.OK);
     }
 
     @PostMapping("/save")
@@ -120,7 +102,7 @@ public class DetailsController extends ApiController {
             details.setPid(id);
             return details;
         }).toList());
-        if(detailsResponseService!=null) {
+        if (detailsResponseService != null) {
             detailsResponseService.process(new DetailsResponse(detailIds));
         }
         return ResponseEntity.ok().build();
@@ -132,29 +114,6 @@ public class DetailsController extends ApiController {
         return ResponseEntity.ok().build();
     }
 
-//    @GetMapping("/order/{paymentTypeId}")
-//    public ResponseEntity<ApiResponse<Integer>> getOrder(@PathVariable Long paymentTypeId) {
-//        return new ResponseEntity<>(ApiResponse.success(detailsService.getOrder(paymentTypeId)), HttpStatus.OK);
-//    }
-
-//    @PostMapping("/order/check")
-//    public ResponseEntity<Void> checkOrder(@RequestBody PaymentTypeDto paymentType) {
-//        detailsService.checkOrder(paymentType);
-//        return ResponseEntity.ok().build();
-//    }
-
-//    @PutMapping("/order")
-//    public ResponseEntity<Void> updateOrder(@RequestBody PaymentTypeDto paymentType) {
-//        detailsService.updateOrder(paymentType);
-//        return ResponseEntity.ok().build();
-//    }
-
-//    @DeleteMapping("/order/{paymentTypeId}")
-//    public ResponseEntity<Void> removeOrder(@PathVariable Long paymentTypeId) {
-//        detailsService.removeOrder(paymentTypeId);
-//        return ResponseEntity.ok().build();
-//    }
-
     @PatchMapping("/{pid}/reserve")
     public ResponseEntity<Void> saveReserveAmount(@PathVariable("pid") Long detailsId,
             @RequestParam("dealAmount") Integer dealAmount) {
@@ -163,10 +122,16 @@ public class DetailsController extends ApiController {
     }
 
     @PostMapping("/{pid}/confirm-payment")
-    public ResponseEntity<Void> confirmPayment(@PathVariable("pid") Long detailsId,
+    public ResponseEntity<ApiResponse<DetailsDto>> confirmPayment(@PathVariable("pid") Long detailsId,
             @RequestParam("dealAmount") Integer dealAmount) {
-        detailsService.confirmPayment(detailsId, dealAmount);
-        return ResponseEntity.ok().build();
+        return new ResponseEntity<>(
+                ApiResponse.success(detailsMapper.toDto(detailsService.confirmPayment(detailsId, dealAmount))),
+                HttpStatus.OK);
+    }
+
+    @ExceptionHandler(EntityNotFoundException.class)
+    public ResponseEntity<ApiResponse<String>> handleEntityNotFound(EntityNotFoundException ex) {
+        return new ResponseEntity<>(ApiResponse.error(ex.getMessage()), HttpStatus.NOT_FOUND);
     }
 
 }

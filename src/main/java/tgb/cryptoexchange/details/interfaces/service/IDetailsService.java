@@ -15,9 +15,9 @@ public interface IDetailsService extends IBasePersistService<Details> {
 
     List<Details> getWithNotEmptyTargetAmount();
 
-    Optional<Details> findByIdOptional(Long pid);
+    Details findById(Long pid);
 
-    Optional<Details> getTarget(List<Long> detailIds, Integer amount);
+    Details getTarget(List<Long> detailIds, Integer amount);
 
     String getNotTargetRequisite(PaymentTypeDto paymentType);
 
@@ -33,7 +33,7 @@ public interface IDetailsService extends IBasePersistService<Details> {
 
     void saveReserveAmount(Long detailsId, Integer dealAmount);
 
-    void confirmPayment(Long detailsId, Integer dealAmount);
+    Details confirmPayment(Long detailsId, Integer dealAmount);
 
     List<Details> saveAll(List<Details> detailsDto);
 
