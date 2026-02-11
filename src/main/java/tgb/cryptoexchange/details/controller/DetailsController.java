@@ -17,7 +17,6 @@ import tgb.cryptoexchange.details.service.DetailsResponseService;
 import tgb.cryptoexchange.web.ApiResponse;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/details")
@@ -31,8 +30,8 @@ public class DetailsController extends ApiController {
     private final DetailsMapper detailsMapper;
 
     public DetailsController(IDetailsService detailsService,
-            @Autowired(required = false) DetailsResponseService detailsResponseService,
-            DetailsMapper detailsMapper) {
+                             @Autowired(required = false) DetailsResponseService detailsResponseService,
+                             DetailsMapper detailsMapper) {
         this.detailsService = detailsService;
         this.detailsResponseService = detailsResponseService;
         this.detailsMapper = detailsMapper;
@@ -55,9 +54,9 @@ public class DetailsController extends ApiController {
                     HttpStatus.OK
             );
         }
-        return new ResponseEntity<>(ApiResponse.error(
-                "Переданы не правильные параметры"),
-                HttpStatus.NOT_FOUND
+        return new ResponseEntity<>(ApiResponse.success(
+                detailsMapper.toDtoList(detailsService.findAll())),
+                HttpStatus.OK
         );
     }
 
@@ -69,7 +68,7 @@ public class DetailsController extends ApiController {
 
     @GetMapping("/target")
     public ResponseEntity<ApiResponse<DetailsDto>> getTarget(@RequestParam("detailIds") List<Long> detailIds,
-            @RequestParam("amount") Integer amount) {
+                                                             @RequestParam("amount") Integer amount) {
         DetailsDto details = detailsMapper.toDto(detailsService.getTarget(detailIds, amount));
         return new ResponseEntity<>(ApiResponse.success(details), HttpStatus.OK);
     }
@@ -116,14 +115,14 @@ public class DetailsController extends ApiController {
 
     @PatchMapping("/{pid}/reserve")
     public ResponseEntity<Void> saveReserveAmount(@PathVariable("pid") Long detailsId,
-            @RequestParam("dealAmount") Integer dealAmount) {
+                                                  @RequestParam("dealAmount") Integer dealAmount) {
         detailsService.saveReserveAmount(detailsId, dealAmount);
         return ResponseEntity.ok().build();
     }
 
     @PostMapping("/{pid}/confirm-payment")
     public ResponseEntity<ApiResponse<DetailsDto>> confirmPayment(@PathVariable("pid") Long detailsId,
-            @RequestParam("dealAmount") Integer dealAmount) {
+                                                                  @RequestParam("dealAmount") Integer dealAmount) {
         return new ResponseEntity<>(
                 ApiResponse.success(detailsMapper.toDto(detailsService.confirmPayment(detailsId, dealAmount))),
                 HttpStatus.OK);
