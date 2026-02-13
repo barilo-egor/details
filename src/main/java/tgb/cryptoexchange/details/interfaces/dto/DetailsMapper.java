@@ -17,10 +17,12 @@ public interface DetailsMapper {
     Details toEntity(DetailsDto detailsDto);
 
     @Mapping(target = "lastAccessedAt", ignore = true)
+    @Mapping(target = "pid", ignore = true)
     void updateEntityFromDto(DetailsDto dto, @MappingTarget Details entity);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     @Mapping(target = "lastAccessedAt", ignore = true)
+    @Mapping(target = "pid", ignore = true)
     void updateEntityFromDtoNotNull(DetailsDto dto, @MappingTarget Details entity);
 
 }
