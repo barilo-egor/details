@@ -108,8 +108,9 @@ public class DetailsController extends ApiController {
     }
 
     @PatchMapping("/{pid}")
-    public ResponseEntity<Void> updateDetails(@PathVariable Long pid, @RequestBody DetailsDto dto) {
-        detailsService.patchDetails(pid, dto);
+    public ResponseEntity<Void> updateDetails(@PathVariable Long pid, @RequestBody DetailsDto dto,
+            @RequestParam(required = false, defaultValue = "false") boolean updateNotNull) {
+        detailsService.patchDetails(pid, dto, updateNotNull);
         return ResponseEntity.ok().build();
     }
 

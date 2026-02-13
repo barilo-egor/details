@@ -13,7 +13,9 @@ import tgb.cryptoexchange.details.repository.BaseRepository;
 import tgb.cryptoexchange.details.repository.DetailsRepository;
 
 import java.time.Instant;
-import java.util.*;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 
 @Service
 @Slf4j
@@ -53,7 +55,7 @@ public class DetailsService extends BasePersistService<Details> implements IDeta
                 int reserveAmount = Objects.nonNull(details.getReserveAmount()) ? details.getReserveAmount() : 0;
                 if (targetAmount - receiveAmount - reserveAmount >= amount && details.isInRange(amount)) {
                     details.setReserveAmount(reserveAmount + amount);
-                   return detailsRepository.save(details);
+                    return detailsRepository.save(details);
                 }
             }
         }
@@ -137,9 +139,13 @@ public class DetailsService extends BasePersistService<Details> implements IDeta
     }
 
     @Transactional
-    public void patchDetails(Long pid, DetailsDto dto) {
+    public void patchDetails(Long pid, DetailsDto dto, boolean updateNotNull) {
         Details details = findById(pid);
-        mapper.updateEntityFromDto(dto, details);
+        if (updateNotNull) {
+            mapper.updateEntityFromDtoNotNull(dto, details);
+        } else {
+            mapper.updateEntityFromDto(dto, details);
+        }
         detailsRepository.save(details);
     }
 

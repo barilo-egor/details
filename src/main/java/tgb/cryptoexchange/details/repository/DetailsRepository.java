@@ -36,7 +36,7 @@ public interface DetailsRepository extends BaseRepository<Details> {
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @QueryHints({
-            //Skip lock пропустит уде заблокированную строку и возьмет следующую
+            //Skip lock пропустит уже заблокированную строку и возьмет следующую
             @QueryHint(name = "jakarta.persistence.lock.timeout", value = "-2")})
     @Query("SELECT d FROM Details d " +
             "WHERE d.pid IN :ids " +

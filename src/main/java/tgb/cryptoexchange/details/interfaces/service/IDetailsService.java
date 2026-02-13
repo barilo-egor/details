@@ -37,6 +37,6 @@ public interface IDetailsService extends IBasePersistService<Details> {
 
     List<Details> saveAll(List<Details> detailsDto);
 
-    void patchDetails(Long pid, DetailsDto dto);
+    void patchDetails(Long pid, DetailsDto dto, boolean updateNotNull);
 
 }

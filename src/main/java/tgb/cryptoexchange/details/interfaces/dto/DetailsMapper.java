@@ -1,9 +1,6 @@
 package tgb.cryptoexchange.details.interfaces.dto;
 
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.MappingTarget;
-import org.mapstruct.ReportingPolicy;
+import org.mapstruct.*;
 import tgb.cryptoexchange.details.dto.DetailsDto;
 import tgb.cryptoexchange.details.entity.Details;
 
@@ -21,5 +18,9 @@ public interface DetailsMapper {
 
     @Mapping(target = "lastAccessedAt", ignore = true)
     void updateEntityFromDto(DetailsDto dto, @MappingTarget Details entity);
+
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    @Mapping(target = "lastAccessedAt", ignore = true)
+    void updateEntityFromDtoNotNull(DetailsDto dto, @MappingTarget Details entity);
 
 }
