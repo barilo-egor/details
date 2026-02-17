@@ -60,7 +60,7 @@ public class DetailsService extends BasePersistService<Details> implements IDeta
             }
         }
 
-        throw new EntityNotFoundException("Не найден целевой реквизит");
+        return null;
     }
 
     @Override

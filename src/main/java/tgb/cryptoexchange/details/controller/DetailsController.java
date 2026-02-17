@@ -69,6 +69,10 @@ public class DetailsController extends ApiController {
     @GetMapping("/target")
     public ResponseEntity<ApiResponse<DetailsDto>> getTarget(@RequestParam("detailIds") List<Long> detailIds,
                                                              @RequestParam("amount") Integer amount) {
+        Details target = detailsService.getTarget(detailIds, amount);
+        if(target == null) {
+            return new ResponseEntity<>(ApiResponse.success(null), HttpStatus.OK);
+        }
         DetailsDto details = detailsMapper.toDto(detailsService.getTarget(detailIds, amount));
         return new ResponseEntity<>(ApiResponse.success(details), HttpStatus.OK);
     }
