@@ -102,6 +102,11 @@ public class DetailsService extends BasePersistService<Details> implements IDeta
     @Override
     public Details findById(Long pid) {
         Optional<Details> maybeDetails = detailsRepository.findById(pid);
+        return maybeDetails.orElse(null);
+    }
+
+    private Details findByIdNotNull(Long pid) {
+        Optional<Details> maybeDetails = detailsRepository.findById(pid);
         if (maybeDetails.isEmpty()) {
             throw new EntityNotFoundException("Не найден реквизит " + pid);
         }
@@ -116,7 +121,7 @@ public class DetailsService extends BasePersistService<Details> implements IDeta
     @Override
     @Transactional
     public void saveReserveAmount(Long detailsId, Integer dealAmount) {
-        Details details = findById(detailsId);
+        Details details = findByIdNotNull(detailsId);
         int reserveAmount = Objects.isNull(details.getReserveAmount()) ? 0 : details.getReserveAmount();
         details.setReserveAmount(reserveAmount - dealAmount);
         detailsRepository.save(details);
@@ -125,7 +130,7 @@ public class DetailsService extends BasePersistService<Details> implements IDeta
     @Override
     @Transactional
     public Details confirmPayment(Long detailsId, Integer dealAmount) {
-        Details details = findById(detailsId);
+        Details details = findByIdNotNull(detailsId);
         int reserveAmount = Objects.isNull(details.getReserveAmount()) ? 0 : details.getReserveAmount();
         int receivedAmount = Objects.isNull(details.getReceivedAmount()) ? 0 : details.getReceivedAmount();
         details.setReserveAmount(reserveAmount - dealAmount);
@@ -140,7 +145,7 @@ public class DetailsService extends BasePersistService<Details> implements IDeta
 
     @Transactional
     public void patchDetails(Long pid, DetailsDto dto, boolean updateNotNull) {
-        Details details = findById(pid);
+        Details details = findByIdNotNull(pid);
         if (updateNotNull) {
             mapper.updateEntityFromDtoNotNull(dto, details);
         } else {
