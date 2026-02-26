@@ -31,11 +31,11 @@ dependencies {
 	annotationProcessor 'org.projectlombok:lombok'
 	annotationProcessor "org.projectlombok:lombok-mapstruct-binding:0.2.0"
 	annotationProcessor "org.mapstruct:mapstruct-processor:1.5.5.Final"
+	runtimeOnly 'com.mysql:mysql-connector-j'
+	implementation 'tgb.cryptoexchange:common-api:1.1.0'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 	testImplementation 'com.h2database:h2'
-	runtimeOnly 'com.mysql:mysql-connector-j'
-	implementation 'tgb.cryptoexchange:common-api:1.1.0'
 }
 
 tasks.named('test') {

@@ -2,7 +2,6 @@ package tgb.cryptoexchange.details.repository;
 
 import jakarta.persistence.LockModeType;
 import jakarta.persistence.QueryHint;
-import jakarta.validation.constraints.NotNull;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;

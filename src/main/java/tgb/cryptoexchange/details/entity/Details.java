@@ -47,11 +47,6 @@ public class Details extends BasePersist {
         }
     }
 
-    //Вообще не используется нигде
-    //    @Builder.Default
-    //    @OneToMany
-    //    private List<Deal> deals = new ArrayList<>();
-
     public Details(Long pid) {
         super(pid);
     }

@@ -67,27 +67,6 @@ public class DetailsService extends BasePersistService<Details> implements IDeta
     public List<Details> findAllByPids(List<Long> detailIds) {
         return detailsRepository.findAllByPidIn(detailIds);
     }
-    //
-    //    @Override
-    //    public List<Details> getByPaymentType(PaymentType paymentType) {
-    //        return detailsRepository.getByPaymentType(paymentType);
-    //    }
-    //
-    //
-    //    @Override
-    //    public List<Details> getByPaymentType_Pid(Long paymentTypePid) {
-    //        return detailsRepository.getByPaymentType_Pid(paymentTypePid);
-    //    }
-    //
-    //    @Override
-    //    public PaymentType getPaymentTypeByPid(Long pid) {
-    //        return detailsRepository.getPaymentTypeByPid(pid);
-    //    }
-    //
-    //    @Override
-    //    public Integer countByPaymentTypePidAndIsOn(Long paymentTypePid) {
-    //        return detailsRepository.countByPaymentTypePidAndIsOn(paymentTypePid);
-    //    }
 
     @Override
     public void updateRequisiteByPid(String requisite, Long pid) {
@@ -101,11 +80,6 @@ public class DetailsService extends BasePersistService<Details> implements IDeta
 
     @Override
     public Details findById(Long pid) {
-        Optional<Details> maybeDetails = detailsRepository.findById(pid);
-        return maybeDetails.orElse(null);
-    }
-
-    private Details findByIdNotNull(Long pid) {
         Optional<Details> maybeDetails = detailsRepository.findById(pid);
         if (maybeDetails.isEmpty()) {
             throw new EntityNotFoundException("Не найден реквизит " + pid);
@@ -121,7 +95,7 @@ public class DetailsService extends BasePersistService<Details> implements IDeta
     @Override
     @Transactional
     public void saveReserveAmount(Long detailsId, Integer dealAmount) {
-        Details details = findByIdNotNull(detailsId);
+        Details details = findById(detailsId);
         int reserveAmount = Objects.isNull(details.getReserveAmount()) ? 0 : details.getReserveAmount();
         details.setReserveAmount(reserveAmount - dealAmount);
         detailsRepository.save(details);
@@ -130,7 +104,7 @@ public class DetailsService extends BasePersistService<Details> implements IDeta
     @Override
     @Transactional
     public Details confirmPayment(Long detailsId, Integer dealAmount) {
-        Details details = findByIdNotNull(detailsId);
+        Details details = findById(detailsId);
         int reserveAmount = Objects.isNull(details.getReserveAmount()) ? 0 : details.getReserveAmount();
         int receivedAmount = Objects.isNull(details.getReceivedAmount()) ? 0 : details.getReceivedAmount();
         details.setReserveAmount(reserveAmount - dealAmount);
@@ -145,7 +119,7 @@ public class DetailsService extends BasePersistService<Details> implements IDeta
 
     @Transactional
     public void patchDetails(Long pid, DetailsDto dto, boolean updateNotNull) {
-        Details details = findByIdNotNull(pid);
+        Details details = findById(pid);
         if (updateNotNull) {
             mapper.updateEntityFromDtoNotNull(dto, details);
         } else {
