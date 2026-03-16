@@ -14,8 +14,7 @@ spring:
     bootstrap-servers: "localhost:9094"
 kafka:
   topic:
-    details:
-      response:
+    details-details-delete:
 details:
   executor:
     core-pool-size:

@@ -20,7 +20,7 @@ public class DetailsResponseService {
 
     public DetailsResponseService(
             KafkaTemplate<String, DetailsResponse> detailsResponseKafkaTemplate,
-            @Value("${kafka.topic.details.response}") String detailsResponseTopic) {
+            @Value("${kafka.topic.details-details-delete}") String detailsResponseTopic) {
         this.detailsResponseKafkaTemplate = detailsResponseKafkaTemplate;
         this.detailsResponseTopic = detailsResponseTopic;
     }
