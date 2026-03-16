@@ -1,0 +1,23 @@
+# Конфиг приложения
+server:
+  port:
+spring:
+  datasource:
+    username:
+    password:
+    url:
+    driver-class-name:
+  jpa:
+    hibernate:
+      ddl-auto: update
+  kafka:
+    bootstrap-servers: "localhost:9094"
+kafka:
+  topic:
+    details:
+      response:
+details:
+  executor:
+    core-pool-size:
+    max-pool-size:
+    queue-capacity:
