@@ -7,7 +7,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import tgb.cryptoexchange.details.dto.DetailsDto;
 import tgb.cryptoexchange.details.entity.Details;
 import tgb.cryptoexchange.details.exception.BaseException;
@@ -45,6 +44,7 @@ class DetailsServiceTest {
         testDetails.setReceivedAmount(0);
         testDetails.setRangeFrom(100);
         testDetails.setRangeTo(5000);
+        testDetails.setIsOn(true);
     }
 
     @Test
@@ -52,9 +52,9 @@ class DetailsServiceTest {
         PaymentTypeDto dto = new PaymentTypeDto();
         dto.setDetails(List.of(1L));
 
-        when(detailsRepository.findOldestAvailableDetail(anyList())).thenReturn(Optional.of(testDetails));
+        when(detailsRepository.findOldestAvailableDetail(anyList(), eq(true))).thenReturn(Optional.of(testDetails));
 
-        String result = detailsService.getNotTargetRequisite(dto);
+        String result = detailsService.getNotTargetRequisite(dto, true);
 
         assertEquals("Test Requisite", result);
         assertNotNull(testDetails.getLastAccessedAt());
@@ -64,18 +64,18 @@ class DetailsServiceTest {
     void getNotTargetRequisite_ShouldThrowException_WhenNotFound() {
         PaymentTypeDto dto = new PaymentTypeDto();
         dto.setName("Card");
-        when(detailsRepository.findOldestAvailableDetail(any())).thenReturn(Optional.empty());
+        when(detailsRepository.findOldestAvailableDetail(any(), eq(true))).thenReturn(Optional.empty());
 
-        assertThrows(EntityNotFoundException.class, () -> detailsService.getNotTargetRequisite(dto));
+        assertThrows(EntityNotFoundException.class, () -> detailsService.getNotTargetRequisite(dto, true));
     }
 
     @Test
     void getTarget_ShouldReserveAndReturn_WhenConditionsMet() {
-        when(detailsRepository.findAllByPidInAndTargetAmountNotEmpty(anyList()))
+        when(detailsRepository.findAllByPidInAndTargetAmountNotEmpty(anyList(), eq(true)))
                 .thenReturn(List.of(testDetails));
         when(detailsRepository.save(any())).thenAnswer(i -> i.getArguments()[0]);
 
-        Details result = detailsService.getTarget(List.of(1L), 500);
+        Details result = detailsService.getTarget(List.of(1L), 500, true);
 
         assertNotNull(result);
         assertEquals(500, result.getReserveAmount());
@@ -84,10 +84,10 @@ class DetailsServiceTest {
 
     @Test
     void getTarget_ShouldReturnNull_WhenAmountIsOutOfRange() {
-        when(detailsRepository.findAllByPidInAndTargetAmountNotEmpty(anyList()))
+        when(detailsRepository.findAllByPidInAndTargetAmountNotEmpty(anyList(), eq(true)))
                 .thenReturn(List.of(testDetails));
 
-        Details result = detailsService.getTarget(List.of(1L), 10000);
+        Details result = detailsService.getTarget(List.of(1L), 10000, true);
 
         assertNull(result);
     }
@@ -95,10 +95,10 @@ class DetailsServiceTest {
     @Test
     void getTarget_ShouldReturnNull_WhenNoCapacityLeft() {
         testDetails.setReceivedAmount(9800);
-        when(detailsRepository.findAllByPidInAndTargetAmountNotEmpty(anyList()))
+        when(detailsRepository.findAllByPidInAndTargetAmountNotEmpty(anyList(), eq(true)))
                 .thenReturn(List.of(testDetails));
 
-        Details result = detailsService.getTarget(List.of(1L), 500);
+        Details result = detailsService.getTarget(List.of(1L), 500, true);
 
         assertNull(result);
     }

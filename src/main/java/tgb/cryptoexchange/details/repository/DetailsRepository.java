@@ -26,10 +26,10 @@ public interface DetailsRepository extends BaseRepository<Details> {
     @Query("from Details where targetAmount is not null and targetAmount > 0")
     List<Details> getWithNotEmptyTargetAmount();
 
-    @Query("from Details d where d.pid in :pids and d.targetAmount is not null and d.targetAmount > 0")
+    @Query("from Details d where d.pid in :pids and (d.isOn = :isOn or (:isOn = false and d.isOn is null)) and d.targetAmount is not null and d.targetAmount > 0")
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @QueryHints({@QueryHint(name = "jakarta.persistence.lock.timeout", value = "5000")})
-    List<Details> findAllByPidInAndTargetAmountNotEmpty(@Param("pids") List<Long> pids);
+    List<Details> findAllByPidInAndTargetAmountNotEmpty(@Param("pids") List<Long> pids, @Param("isOn") Boolean isOn);
 
     List<Details> findAllByPidIn(List<Long> pids);
 
@@ -39,9 +39,10 @@ public interface DetailsRepository extends BaseRepository<Details> {
             @QueryHint(name = "jakarta.persistence.lock.timeout", value = "-2")})
     @Query("SELECT d FROM Details d " +
             "WHERE d.pid IN :ids " +
+            "AND (d.isOn = :isOn OR (:isOn = false AND d.isOn IS NULL)) " +
             "AND (d.targetAmount IS NULL OR d.targetAmount = 0) " +
             "ORDER BY d.lastAccessedAt ASC LIMIT 1")
-    Optional<Details> findOldestAvailableDetail(@Param("ids") List<Long> ids);
+    Optional<Details> findOldestAvailableDetail(@Param("ids") List<Long> ids, @Param("isOn") Boolean isOn);
 
     @Override
     @Lock(LockModeType.PESSIMISTIC_WRITE)

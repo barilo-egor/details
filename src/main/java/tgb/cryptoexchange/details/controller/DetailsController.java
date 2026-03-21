@@ -68,18 +68,20 @@ public class DetailsController extends ApiController {
 
     @GetMapping("/target")
     public ResponseEntity<ApiResponse<DetailsDto>> getTarget(@RequestParam("detailIds") List<Long> detailIds,
-                                                             @RequestParam("amount") Integer amount) {
-        Details target = detailsService.getTarget(detailIds, amount);
-        if(target == null) {
+                                                             @RequestParam("amount") Integer amount,
+                                                             @RequestParam("isOn") Boolean isOn) {
+        Details target = detailsService.getTarget(detailIds, amount, isOn);
+        if (target == null) {
             return new ResponseEntity<>(ApiResponse.success(null), HttpStatus.OK);
         }
-        DetailsDto details = detailsMapper.toDto(detailsService.getTarget(detailIds, amount));
+        DetailsDto details = detailsMapper.toDto(detailsService.getTarget(detailIds, amount, isOn));
         return new ResponseEntity<>(ApiResponse.success(details), HttpStatus.OK);
     }
 
     @PostMapping("/non-target")
-    public ResponseEntity<ApiResponse<String>> getNonTargetRequisite(@RequestBody PaymentTypeDto paymentTypeDto) {
-        return new ResponseEntity<>(ApiResponse.success(detailsService.getNotTargetRequisite(paymentTypeDto)),
+    public ResponseEntity<ApiResponse<String>> getNonTargetRequisite(@RequestBody PaymentTypeDto paymentTypeDto,
+                                                                     @RequestParam("isOn") Boolean isOn) {
+        return new ResponseEntity<>(ApiResponse.success(detailsService.getNotTargetRequisite(paymentTypeDto, isOn)),
                 HttpStatus.OK);
     }
 
