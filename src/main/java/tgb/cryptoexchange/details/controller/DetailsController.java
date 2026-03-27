@@ -74,7 +74,7 @@ public class DetailsController extends ApiController {
         if (target == null) {
             return new ResponseEntity<>(ApiResponse.success(null), HttpStatus.OK);
         }
-        DetailsDto details = detailsMapper.toDto(detailsService.getTarget(detailIds, amount, isOn));
+        DetailsDto details = detailsMapper.toDto(target);
         return new ResponseEntity<>(ApiResponse.success(details), HttpStatus.OK);
     }
 
