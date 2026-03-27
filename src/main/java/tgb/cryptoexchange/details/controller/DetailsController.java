@@ -30,8 +30,8 @@ public class DetailsController extends ApiController {
     private final DetailsMapper detailsMapper;
 
     public DetailsController(IDetailsService detailsService,
-                             @Autowired(required = false) DetailsResponseService detailsResponseService,
-                             DetailsMapper detailsMapper) {
+            @Autowired(required = false) DetailsResponseService detailsResponseService,
+            DetailsMapper detailsMapper) {
         this.detailsService = detailsService;
         this.detailsResponseService = detailsResponseService;
         this.detailsMapper = detailsMapper;
@@ -68,8 +68,8 @@ public class DetailsController extends ApiController {
 
     @GetMapping("/target")
     public ResponseEntity<ApiResponse<DetailsDto>> getTarget(@RequestParam("detailIds") List<Long> detailIds,
-                                                             @RequestParam("amount") Integer amount,
-                                                             @RequestParam("isOn") Boolean isOn) {
+            @RequestParam("amount") Integer amount,
+            @RequestParam("isOn") Boolean isOn) {
         Details target = detailsService.getTarget(detailIds, amount, isOn);
         if (target == null) {
             return new ResponseEntity<>(ApiResponse.success(null), HttpStatus.OK);
@@ -80,7 +80,8 @@ public class DetailsController extends ApiController {
 
     @PostMapping("/non-target")
     public ResponseEntity<ApiResponse<String>> getNonTargetRequisite(@RequestBody PaymentTypeDto paymentTypeDto,
-                                                                     @RequestParam("isOn") Boolean isOn) {
+            @RequestParam("isOn") Boolean isOn) {
+        log.debug("Поиск non-targer реквизитов: paimentType = {} isOn = {}", paymentTypeDto, isOn);
         return new ResponseEntity<>(ApiResponse.success(detailsService.getNotTargetRequisite(paymentTypeDto, isOn)),
                 HttpStatus.OK);
     }
@@ -122,14 +123,14 @@ public class DetailsController extends ApiController {
 
     @PatchMapping("/{pid}/reserve")
     public ResponseEntity<Void> saveReserveAmount(@PathVariable("pid") Long detailsId,
-                                                  @RequestParam("dealAmount") Integer dealAmount) {
+            @RequestParam("dealAmount") Integer dealAmount) {
         detailsService.saveReserveAmount(detailsId, dealAmount);
         return ResponseEntity.ok().build();
     }
 
     @PostMapping("/{pid}/confirm-payment")
     public ResponseEntity<ApiResponse<DetailsDto>> confirmPayment(@PathVariable("pid") Long detailsId,
-                                                                  @RequestParam("dealAmount") Integer dealAmount) {
+            @RequestParam("dealAmount") Integer dealAmount) {
         return new ResponseEntity<>(
                 ApiResponse.success(detailsMapper.toDto(detailsService.confirmPayment(detailsId, dealAmount))),
                 HttpStatus.OK);
