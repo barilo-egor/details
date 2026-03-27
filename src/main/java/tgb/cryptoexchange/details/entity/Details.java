@@ -25,8 +25,8 @@ public class Details extends BasePersist {
     @Column(name = "REQUISITE")
     private String requisite;
 
-    @Column(name = "IS_ON", nullable = false)
-    private boolean isOn;
+    @Column(name = "IS_ON")
+    private Boolean isOn;
 
     private Integer targetAmount;
 

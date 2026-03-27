@@ -19,7 +19,7 @@ public class DetailsDto implements Serializable {
 
     private String requisite;
 
-    private boolean isOn;
+    private Boolean isOn;
 
     private Integer targetAmount;
 
