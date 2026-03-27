@@ -44,7 +44,7 @@ class DetailsServiceTest {
         testDetails.setReceivedAmount(0);
         testDetails.setRangeFrom(100);
         testDetails.setRangeTo(5000);
-        testDetails.setIsOn(true);
+        testDetails.setOn(true);
     }
 
     @Test

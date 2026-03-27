@@ -60,7 +60,7 @@ class DetailsRepositoryTest {
     void findOldestAvailableDetail() {
         Details old = new Details();
         old.setTargetAmount(0);
-        old.setIsOn(true);
+        old.setOn(true);
         old.setLastAccessedAt(Instant.now().minusSeconds(100));
 
         Details fresh = new Details();
@@ -81,7 +81,7 @@ class DetailsRepositoryTest {
     void findAllByPidInAndTargetAmountNotEmpty() {
         Details d1 = new Details();
         d1.setTargetAmount(500);
-        d1.setIsOn(true);
+        d1.setOn(true);
         Details d2 = new Details();
         d2.setTargetAmount(0);
         List<Details> saved = detailsRepository.saveAllAndFlush(List.of(d1, d2));

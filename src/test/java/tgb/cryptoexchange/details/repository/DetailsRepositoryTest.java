@@ -31,21 +31,21 @@ class DetailsRepositoryTest {
         detailWithTarget = new Details();
         detailWithTarget.setRequisite("Target Req");
         detailWithTarget.setTargetAmount(10000);
-        detailWithTarget.setIsOn(true);
+        detailWithTarget.setOn(true);
         entityManager.persist(detailWithTarget);
 
         oldestDetail = new Details();
         oldestDetail.setRequisite("Oldest Req");
         oldestDetail.setLastAccessedAt(Instant.now().minusSeconds(3600));
         oldestDetail.setTargetAmount(0);
-        oldestDetail.setIsOn(true);
+        oldestDetail.setOn(true);
         entityManager.persist(oldestDetail);
 
         Details freshDetail = new Details();
         freshDetail.setRequisite("Fresh Req");
         freshDetail.setLastAccessedAt(Instant.now());
         freshDetail.setTargetAmount(0);
-        freshDetail.setIsOn(true);
+        freshDetail.setOn(true);
         entityManager.persist(freshDetail);
 
         entityManager.flush();
