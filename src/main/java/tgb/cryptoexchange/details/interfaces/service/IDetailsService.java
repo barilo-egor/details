@@ -1,13 +1,11 @@
 package tgb.cryptoexchange.details.interfaces.service;
 
-import org.springframework.web.bind.annotation.RequestParam;
 import tgb.cryptoexchange.details.dto.DetailsDto;
 import tgb.cryptoexchange.details.entity.Details;
 import tgb.cryptoexchange.details.interfaces.IBasePersistService;
 import tgb.cryptoexchange.details.interfaces.dto.PaymentTypeDto;
 
 import java.util.List;
-import java.util.Optional;
 
 public interface IDetailsService extends IBasePersistService<Details> {
 
@@ -17,9 +15,9 @@ public interface IDetailsService extends IBasePersistService<Details> {
 
     Details findById(Long pid);
 
-    Details getTarget(List<Long> detailIds, Integer amount);
+    Details getTarget(List<Long> detailIds, Integer amount, Boolean isOn);
 
-    String getNotTargetRequisite(PaymentTypeDto paymentType);
+    String getNotTargetRequisite(PaymentTypeDto paymentType, Boolean isOn);
 
     List<Details> findAllByPids(List<Long> detailIds);
 

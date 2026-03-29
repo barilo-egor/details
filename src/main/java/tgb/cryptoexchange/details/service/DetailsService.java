@@ -32,8 +32,8 @@ public class DetailsService extends BasePersistService<Details> implements IDeta
 
     @Override
     @Transactional
-    public String getNotTargetRequisite(PaymentTypeDto paymentType) {
-        Optional<Details> detailsOptional = detailsRepository.findOldestAvailableDetail(paymentType.getDetails());
+    public String getNotTargetRequisite(PaymentTypeDto paymentType, Boolean isOn) {
+        Optional<Details> detailsOptional = detailsRepository.findOldestAvailableDetail(paymentType.getDetails(), isOn);
         if (detailsOptional.isEmpty()) {
             throw new EntityNotFoundException(
                     "Не найден ни один подходящий реквизит для " + paymentType.getName() + ".");
@@ -45,9 +45,9 @@ public class DetailsService extends BasePersistService<Details> implements IDeta
 
     @Override
     @Transactional
-    public Details getTarget(List<Long> detailIds, Integer amount) {
+    public Details getTarget(List<Long> detailIds, Integer amount, Boolean isOn) {
         List<Long> sortedDetails = detailIds.stream().distinct().sorted().toList();
-        List<Details> targetDetails = detailsRepository.findAllByPidInAndTargetAmountNotEmpty(sortedDetails);
+        List<Details> targetDetails = detailsRepository.findAllByPidInAndTargetAmountNotEmpty(sortedDetails, isOn);
         if (!targetDetails.isEmpty()) {
             for (Details details : targetDetails) {
                 int targetAmount = details.getTargetAmount();
