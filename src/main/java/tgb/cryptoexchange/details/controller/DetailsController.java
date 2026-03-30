@@ -21,6 +21,7 @@ import tgb.cryptoexchange.details.service.DetailsResponseService;
 import tgb.cryptoexchange.web.ApiResponse;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/details")
@@ -42,14 +43,14 @@ public class DetailsController extends ApiController {
     }
 
     @GetMapping
-    public ResponseEntity<ApiResponse<Page<DetailsDto>>> findAll(
+    public ResponseEntity<ApiResponse<List<DetailsDto>>> findAll(
             @RequestParam(value = "detailIds", required = false) List<Long> pids,
             @RequestParam(value = "hasTargetAmount", required = false, defaultValue = "false") boolean hasTargetAmount,
             @PageableDefault(size = 20) Pageable pageable) {
         Page<Details> detailsPage = detailsService.findAll(pids, hasTargetAmount, pageable);
         return ResponseEntity.ok()
                 .header("X-Total-Count", String.valueOf(detailsPage.getTotalElements()))
-                .body(ApiResponse.success(detailsPage.map(detailsMapper::toDto)));
+                .body(ApiResponse.success(detailsPage.stream().map(detailsMapper::toDto).collect(Collectors.toList())));
     }
 
     @GetMapping("/{pid}")

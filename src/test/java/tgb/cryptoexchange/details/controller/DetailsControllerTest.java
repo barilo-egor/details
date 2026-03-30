@@ -63,7 +63,7 @@ class DetailsControllerTest {
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.data.content").isArray());
+                .andExpect(jsonPath("$.data").isArray());
     }
 
     @Test
