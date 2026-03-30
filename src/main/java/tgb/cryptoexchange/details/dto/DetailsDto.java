@@ -17,6 +17,8 @@ public class DetailsDto implements Serializable {
 
     private String name;
 
+    private String shortName;
+
     private String requisite;
 
     private Boolean isOn;
