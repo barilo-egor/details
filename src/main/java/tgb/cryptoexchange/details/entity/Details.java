@@ -22,6 +22,8 @@ public class Details extends BasePersist {
     @Column(name = "NAME")
     private String name;
 
+    private String shortName;
+
     @Column(name = "REQUISITE")
     private String requisite;
 
