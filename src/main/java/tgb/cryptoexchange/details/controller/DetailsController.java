@@ -48,24 +48,23 @@ public class DetailsController extends ApiController {
             @PageableDefault(size = 20) Pageable pageable) {
         if (!CollectionUtils.isEmpty(pids)) {
             Page<Details> detailsPage = detailsService.findAllByPids(pids, pageable);
-            return new ResponseEntity<>(ApiResponse.success(
-                    detailsPage.map(detailsMapper::toDto)),
-                    HttpStatus.OK
-            );
-
+            return ResponseEntity.ok()
+                    .header("X-Total-Count", String.valueOf(detailsPage.getTotalElements()))
+                    .body(ApiResponse.success(
+                            detailsPage.map(detailsMapper::toDto)));
         }
         if (hasTargetAmount) {
             Page<Details> detailsPage = detailsService.getWithNotEmptyTargetAmount(pageable);
-            return new ResponseEntity<>(ApiResponse.success(
-                    detailsPage.map(detailsMapper::toDto)),
-                    HttpStatus.OK
-            );
+            return ResponseEntity.ok()
+                    .header("X-Total-Count", String.valueOf(detailsPage.getTotalElements()))
+                    .body(ApiResponse.success(
+                            detailsPage.map(detailsMapper::toDto)));
         }
         Page<Details> detailsPage = detailsService.findAll(pageable);
-        return new ResponseEntity<>(ApiResponse.success(
-                detailsPage.map(detailsMapper::toDto)),
-                HttpStatus.OK
-        );
+        return ResponseEntity.ok()
+                .header("X-Total-Count", String.valueOf(detailsPage.getTotalElements()))
+                .body(ApiResponse.success(
+                        detailsPage.map(detailsMapper::toDto)));
     }
 
     @GetMapping("/{pid}")
