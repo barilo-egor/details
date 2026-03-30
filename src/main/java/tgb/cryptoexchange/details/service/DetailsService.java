@@ -3,7 +3,10 @@ package tgb.cryptoexchange.details.service;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import tgb.cryptoexchange.details.dto.DetailsDto;
 import tgb.cryptoexchange.details.entity.Details;
 import tgb.cryptoexchange.details.interfaces.dto.DetailsMapper;
@@ -64,8 +67,18 @@ public class DetailsService extends BasePersistService<Details> implements IDeta
     }
 
     @Override
-    public List<Details> findAllByPids(List<Long> detailIds) {
-        return detailsRepository.findAllByPidIn(detailIds);
+    public Page<Details> findAll(List<Long> detailsPids, boolean hasTargetAmount, Pageable pageable) {
+        if (!CollectionUtils.isEmpty(detailsPids)) {
+            return findAllByPids(detailsPids, pageable);
+        } else if (hasTargetAmount) {
+            return getWithNotEmptyTargetAmount(pageable);
+        }
+        return findAll(pageable);
+    }
+
+    @Override
+    public Page<Details> findAllByPids(List<Long> detailIds, Pageable pageable) {
+        return detailsRepository.findAllByPidIn(detailIds, pageable);
     }
 
     @Override
@@ -74,8 +87,8 @@ public class DetailsService extends BasePersistService<Details> implements IDeta
     }
 
     @Override
-    public List<Details> getWithNotEmptyTargetAmount() {
-        return detailsRepository.getWithNotEmptyTargetAmount();
+    public Page<Details> getWithNotEmptyTargetAmount(Pageable pageable) {
+        return detailsRepository.getWithNotEmptyTargetAmount(pageable);
     }
 
     @Override
@@ -126,6 +139,11 @@ public class DetailsService extends BasePersistService<Details> implements IDeta
             mapper.updateEntityFromDto(dto, details);
         }
         detailsRepository.save(details);
+    }
+
+    @Override
+    public Page<Details> findAll(Pageable pageable) {
+        return detailsRepository.findAll(pageable);
     }
 
 }

@@ -5,6 +5,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import tgb.cryptoexchange.details.entity.Details;
 
 import java.time.Instant;
@@ -64,10 +67,11 @@ class DetailsRepositoryTest {
 
     @Test
     void getWithNotEmptyTargetAmount_ShouldReturnOnlyRelevant() {
-        List<Details> result = detailsRepository.getWithNotEmptyTargetAmount();
+        Pageable pageable = PageRequest.of(0, 1);
+        Page<Details> result = detailsRepository.getWithNotEmptyTargetAmount(pageable);
 
         assertThat(result).hasSize(1);
-        assertThat(result.getFirst().getRequisite()).isEqualTo("Target Req");
+        assertThat(result.getContent().getFirst().getRequisite()).isEqualTo("Target Req");
     }
 
     @Test

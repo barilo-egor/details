@@ -3,8 +3,12 @@ package tgb.cryptoexchange.details.controller;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
 import tgb.cryptoexchange.controller.ApiController;
 import tgb.cryptoexchange.details.dto.DetailsDto;
@@ -17,6 +21,7 @@ import tgb.cryptoexchange.details.service.DetailsResponseService;
 import tgb.cryptoexchange.web.ApiResponse;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/details")
@@ -40,24 +45,12 @@ public class DetailsController extends ApiController {
     @GetMapping
     public ResponseEntity<ApiResponse<List<DetailsDto>>> findAll(
             @RequestParam(value = "detailIds", required = false) List<Long> pids,
-            @RequestParam(value = "hasTargetAmount", required = false, defaultValue = "false") boolean hasTargetAmount) {
-        if (pids != null && !pids.isEmpty()) {
-            return new ResponseEntity<>(ApiResponse.success(
-                    detailsMapper.toDtoList(detailsService.findAllByPids(pids))),
-                    HttpStatus.OK
-            );
-
-        }
-        if (hasTargetAmount) {
-            return new ResponseEntity<>(ApiResponse.success(
-                    detailsMapper.toDtoList(detailsService.getWithNotEmptyTargetAmount())),
-                    HttpStatus.OK
-            );
-        }
-        return new ResponseEntity<>(ApiResponse.success(
-                detailsMapper.toDtoList(detailsService.findAll())),
-                HttpStatus.OK
-        );
+            @RequestParam(value = "hasTargetAmount", required = false, defaultValue = "false") boolean hasTargetAmount,
+            @PageableDefault(size = 20) Pageable pageable) {
+        Page<Details> detailsPage = detailsService.findAll(pids, hasTargetAmount, pageable);
+        return ResponseEntity.ok()
+                .header("X-Total-Count", String.valueOf(detailsPage.getTotalElements()))
+                .body(ApiResponse.success(detailsPage.stream().map(detailsMapper::toDto).collect(Collectors.toList())));
     }
 
     @GetMapping("/{pid}")

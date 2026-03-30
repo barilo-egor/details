@@ -5,7 +5,13 @@ import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import tgb.cryptoexchange.details.dto.DetailsDto;
@@ -14,11 +20,11 @@ import tgb.cryptoexchange.details.interfaces.dto.DetailsMapper;
 import tgb.cryptoexchange.details.interfaces.service.IDetailsService;
 import tgb.cryptoexchange.details.kafka.DetailsResponse;
 import tgb.cryptoexchange.details.service.DetailsResponseService;
+import tgb.cryptoexchange.web.ApiResponse;
 
 import java.util.List;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -48,8 +54,10 @@ class DetailsControllerTest {
         List<Details> entities = List.of(new Details());
         List<DetailsDto> dtos = List.of(new DetailsDto());
 
-        when(detailsService.findAll()).thenReturn(entities);
-        when(detailsMapper.toDtoList(entities)).thenReturn(dtos);
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<Details> detailsPage = new PageImpl<>(entities, pageable, entities.size());
+        when(detailsService.findAll(nullable(List.class), anyBoolean(), any(Pageable.class))).thenReturn(detailsPage);
+        when(detailsMapper.toDto(any(Details.class))).thenReturn(dtos.getFirst());
 
         mockMvc.perform(get("/details")
                         .contentType(MediaType.APPLICATION_JSON))

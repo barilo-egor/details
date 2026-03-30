@@ -1,5 +1,8 @@
 package tgb.cryptoexchange.details.interfaces.service;
 
+import org.springframework.data.domain.Example;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import tgb.cryptoexchange.details.dto.DetailsDto;
 import tgb.cryptoexchange.details.entity.Details;
 import tgb.cryptoexchange.details.interfaces.IBasePersistService;
@@ -11,7 +14,7 @@ public interface IDetailsService extends IBasePersistService<Details> {
 
     void updateRequisiteByPid(String requisite, Long pid);
 
-    List<Details> getWithNotEmptyTargetAmount();
+    Page<Details> getWithNotEmptyTargetAmount(Pageable pageable);
 
     Details findById(Long pid);
 
@@ -19,7 +22,9 @@ public interface IDetailsService extends IBasePersistService<Details> {
 
     String getNotTargetRequisite(PaymentTypeDto paymentType, Boolean isOn);
 
-    List<Details> findAllByPids(List<Long> detailIds);
+    Page<Details> findAll(List<Long> detailsPids, boolean hasTargetAmount, Pageable pageable);
+
+    Page<Details> findAllByPids(List<Long> detailIds, Pageable pageable);
 
     void saveReserveAmount(Long detailsId, Integer dealAmount);
 
@@ -28,5 +33,7 @@ public interface IDetailsService extends IBasePersistService<Details> {
     List<Details> saveAll(List<Details> detailsDto);
 
     void patchDetails(Long pid, DetailsDto dto, boolean updateNotNull);
+
+    Page<Details> findAll(Pageable pageable);
 
 }
