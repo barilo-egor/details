@@ -24,8 +24,7 @@ import tgb.cryptoexchange.web.ApiResponse;
 
 import java.util.List;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -57,7 +56,7 @@ class DetailsControllerTest {
 
         Pageable pageable = PageRequest.of(0, 10);
         Page<Details> detailsPage = new PageImpl<>(entities, pageable, entities.size());
-        when(detailsService.findAll(any(Pageable.class))).thenReturn(detailsPage);
+        when(detailsService.findAll(nullable(List.class), anyBoolean(), any(Pageable.class))).thenReturn(detailsPage);
         when(detailsMapper.toDto(any(Details.class))).thenReturn(dtos.getFirst());
 
         mockMvc.perform(get("/details")
