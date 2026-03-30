@@ -2,6 +2,8 @@ package tgb.cryptoexchange.details.repository;
 
 import jakarta.persistence.LockModeType;
 import jakarta.persistence.QueryHint;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -24,14 +26,14 @@ public interface DetailsRepository extends BaseRepository<Details> {
     void updateRequisiteByPid(String requisite, Long pid);
 
     @Query("from Details where targetAmount is not null and targetAmount > 0")
-    List<Details> getWithNotEmptyTargetAmount();
+    Page<Details> getWithNotEmptyTargetAmount(Pageable pageable);
 
     @Query("from Details d where d.pid in :pids and (d.isOn = :isOn or (:isOn = false and d.isOn is null)) and d.targetAmount is not null and d.targetAmount > 0")
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @QueryHints({@QueryHint(name = "jakarta.persistence.lock.timeout", value = "5000")})
     List<Details> findAllByPidInAndTargetAmountNotEmpty(@Param("pids") List<Long> pids, @Param("isOn") Boolean isOn);
 
-    List<Details> findAllByPidIn(List<Long> pids);
+    Page<Details> findAllByPidIn(List<Long> pids, Pageable pageable);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @QueryHints({

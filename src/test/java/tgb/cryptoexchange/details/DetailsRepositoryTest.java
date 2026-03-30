@@ -5,6 +5,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import tgb.cryptoexchange.details.entity.Details;
 import tgb.cryptoexchange.details.repository.DetailsRepository;
 
@@ -48,11 +51,11 @@ class DetailsRepositoryTest {
         Details d3 = new Details();
         d3.setTargetAmount(null);
         detailsRepository.saveAll(List.of(d1, d2, d3));
-
-        List<Details> result = detailsRepository.getWithNotEmptyTargetAmount();
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<Details> result = detailsRepository.getWithNotEmptyTargetAmount(pageable);
 
         assertThat(result).hasSize(1);
-        assertThat(result.getFirst().getTargetAmount()).isGreaterThan(0);
+        assertThat(result.getContent().getFirst().getTargetAmount()).isGreaterThan(0);
     }
 
     @Test

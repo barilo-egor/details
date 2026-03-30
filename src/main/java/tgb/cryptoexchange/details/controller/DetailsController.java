@@ -3,8 +3,12 @@ package tgb.cryptoexchange.details.controller;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
 import tgb.cryptoexchange.controller.ApiController;
 import tgb.cryptoexchange.details.dto.DetailsDto;
@@ -38,24 +42,28 @@ public class DetailsController extends ApiController {
     }
 
     @GetMapping
-    public ResponseEntity<ApiResponse<List<DetailsDto>>> findAll(
+    public ResponseEntity<ApiResponse<Page<DetailsDto>>> findAll(
             @RequestParam(value = "detailIds", required = false) List<Long> pids,
-            @RequestParam(value = "hasTargetAmount", required = false, defaultValue = "false") boolean hasTargetAmount) {
-        if (pids != null && !pids.isEmpty()) {
+            @RequestParam(value = "hasTargetAmount", required = false, defaultValue = "false") boolean hasTargetAmount,
+            @PageableDefault(size = 20) Pageable pageable) {
+        if (!CollectionUtils.isEmpty(pids)) {
+            Page<Details> detailsPage = detailsService.findAllByPids(pids, pageable);
             return new ResponseEntity<>(ApiResponse.success(
-                    detailsMapper.toDtoList(detailsService.findAllByPids(pids))),
+                    detailsPage.map(detailsMapper::toDto)),
                     HttpStatus.OK
             );
 
         }
         if (hasTargetAmount) {
+            Page<Details> detailsPage = detailsService.getWithNotEmptyTargetAmount(pageable);
             return new ResponseEntity<>(ApiResponse.success(
-                    detailsMapper.toDtoList(detailsService.getWithNotEmptyTargetAmount())),
+                    detailsPage.map(detailsMapper::toDto)),
                     HttpStatus.OK
             );
         }
+        Page<Details> detailsPage = detailsService.findAll(pageable);
         return new ResponseEntity<>(ApiResponse.success(
-                detailsMapper.toDtoList(detailsService.findAll())),
+                detailsPage.map(detailsMapper::toDto)),
                 HttpStatus.OK
         );
     }
