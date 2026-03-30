@@ -22,6 +22,8 @@ public interface IDetailsService extends IBasePersistService<Details> {
 
     String getNotTargetRequisite(PaymentTypeDto paymentType, Boolean isOn);
 
+    Page<Details> findAll(List<Long> detailsPids, boolean hasTargetAmount, Pageable pageable);
+
     Page<Details> findAllByPids(List<Long> detailIds, Pageable pageable);
 
     void saveReserveAmount(Long detailsId, Integer dealAmount);
