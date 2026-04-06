@@ -35,7 +35,7 @@ public class DetailsService extends BasePersistService<Details> implements IDeta
 
     @Override
     @Transactional
-    public String getNotTargetRequisite(PaymentTypeDto paymentType, Boolean isOn) {
+    public Details getNotTargetRequisite(PaymentTypeDto paymentType, Boolean isOn) {
         Optional<Details> detailsOptional = detailsRepository.findOldestAvailableDetail(paymentType.getDetails(), isOn);
         if (detailsOptional.isEmpty()) {
             throw new EntityNotFoundException(
@@ -43,7 +43,7 @@ public class DetailsService extends BasePersistService<Details> implements IDeta
         }
         Details details = detailsOptional.get();
         details.setLastAccessedAt(Instant.now());
-        return details.getRequisite();
+        return details;
     }
 
     @Override

@@ -1,6 +1,5 @@
 package tgb.cryptoexchange.details.interfaces.service;
 
-import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import tgb.cryptoexchange.details.dto.DetailsDto;
@@ -20,7 +19,7 @@ public interface IDetailsService extends IBasePersistService<Details> {
 
     Details getTarget(List<Long> detailIds, Integer amount, Boolean isOn);
 
-    String getNotTargetRequisite(PaymentTypeDto paymentType, Boolean isOn);
+    Details getNotTargetRequisite(PaymentTypeDto paymentType, Boolean isOn);
 
     Page<Details> findAll(List<Long> detailsPids, boolean hasTargetAmount, Pageable pageable);
 
