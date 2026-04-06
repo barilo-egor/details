@@ -54,9 +54,9 @@ class DetailsServiceTest {
 
         when(detailsRepository.findOldestAvailableDetail(anyList(), eq(true))).thenReturn(Optional.of(testDetails));
 
-        String result = detailsService.getNotTargetRequisite(dto, true);
+        Details result = detailsService.getNotTargetRequisite(dto, true);
 
-        assertEquals("Test Requisite", result);
+        assertEquals("Test Requisite", result.getRequisite());
         assertNotNull(testDetails.getLastAccessedAt());
     }
 

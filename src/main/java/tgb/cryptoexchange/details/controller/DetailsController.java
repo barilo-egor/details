@@ -8,7 +8,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
 import tgb.cryptoexchange.controller.ApiController;
 import tgb.cryptoexchange.details.dto.DetailsDto;
@@ -21,7 +20,6 @@ import tgb.cryptoexchange.details.service.DetailsResponseService;
 import tgb.cryptoexchange.web.ApiResponse;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/details")
@@ -50,7 +48,7 @@ public class DetailsController extends ApiController {
         Page<Details> detailsPage = detailsService.findAll(pids, hasTargetAmount, pageable);
         return ResponseEntity.ok()
                 .header("X-Total-Count", String.valueOf(detailsPage.getTotalElements()))
-                .body(ApiResponse.success(detailsPage.stream().map(detailsMapper::toDto).collect(Collectors.toList())));
+                .body(ApiResponse.success(detailsPage.stream().map(detailsMapper::toDto).toList()));
     }
 
     @GetMapping("/{pid}")
@@ -72,11 +70,12 @@ public class DetailsController extends ApiController {
     }
 
     @PostMapping("/non-target")
-    public ResponseEntity<ApiResponse<String>> getNonTargetRequisite(@RequestBody PaymentTypeDto paymentTypeDto,
+    public ResponseEntity<ApiResponse<DetailsDto>> getNonTargetRequisite(@RequestBody PaymentTypeDto paymentTypeDto,
             @RequestParam("isOn") Boolean isOn) {
-        log.debug("Поиск non-targer реквизитов: paimentType = {} isOn = {}", paymentTypeDto, isOn);
-        return new ResponseEntity<>(ApiResponse.success(detailsService.getNotTargetRequisite(paymentTypeDto, isOn)),
-                HttpStatus.OK);
+        log.debug("Поиск non-target реквизитов: paymentType = {} isOn = {}", paymentTypeDto, isOn);
+        Details nonTarget = detailsService.getNotTargetRequisite(paymentTypeDto, isOn);
+        DetailsDto dto = detailsMapper.toDto(nonTarget);
+        return new ResponseEntity<>(ApiResponse.success(dto), HttpStatus.OK);
     }
 
     @PostMapping("/save")
