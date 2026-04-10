@@ -32,7 +32,8 @@ public class DealInfoController extends ApiController {
 
     @GetMapping
     public ResponseEntity<ApiResponse<List<DealInfoDto>>> findAll(
-            @RequestBody DealInfoDto dealInfoDto, @PageableDefault(size = 20) Pageable pageable) {
+            @RequestBody(required = false) DealInfoDto dealInfoDto, @PageableDefault(size = 20) Pageable pageable) {
+        if(dealInfoDto==null) dealInfoDto = new DealInfoDto();
         Page<DealInfo> dealInfos = dealInfoService.findAll(dealInfoDto, pageable);
         return ResponseEntity.ok()
                 .header("X-Total-Count", String.valueOf(dealInfos.getTotalElements()))
