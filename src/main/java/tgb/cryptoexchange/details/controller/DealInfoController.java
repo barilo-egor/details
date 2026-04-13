@@ -17,7 +17,7 @@ import tgb.cryptoexchange.web.ApiResponse;
 import java.util.List;
 
 @RestController
-@RequestMapping("/deal-info")
+@RequestMapping("/details/deal-info")
 @Slf4j
 public class DealInfoController extends ApiController {
 
