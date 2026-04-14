@@ -5,6 +5,8 @@ import lombok.*;
 import tgb.cryptoexchange.details.exception.BaseException;
 
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "Details")
@@ -24,8 +26,8 @@ public class Details extends BasePersist {
     @Column(name = "REQUISITE")
     private String requisite;
 
-    @OneToOne(mappedBy = "details", cascade = CascadeType.ALL, orphanRemoval = true)
-    private DealInfo dealInfo;
+    @OneToMany(mappedBy = "details", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<DealInfo> dealInfos = new ArrayList<>();
 
     @Column(name = "IS_ON")
     private Boolean isOn;

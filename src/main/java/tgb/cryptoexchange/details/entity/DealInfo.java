@@ -16,7 +16,7 @@ public class DealInfo extends BasePersist {
     @Column
     private Long dealId;
 
-    @OneToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "details_id")
     private Details details;
 
