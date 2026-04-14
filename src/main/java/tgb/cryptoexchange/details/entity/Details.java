@@ -1,9 +1,6 @@
 package tgb.cryptoexchange.details.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.PrePersist;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.*;
 import tgb.cryptoexchange.details.exception.BaseException;
 
@@ -26,6 +23,9 @@ public class Details extends BasePersist {
 
     @Column(name = "REQUISITE")
     private String requisite;
+
+    @OneToOne(mappedBy = "details", cascade = CascadeType.ALL, orphanRemoval = true)
+    private DealInfo dealInfo;
 
     @Column(name = "IS_ON")
     private Boolean isOn;

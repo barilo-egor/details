@@ -1,13 +1,7 @@
 package tgb.cryptoexchange.details.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.PrePersist;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.*;
-import tgb.cryptoexchange.details.exception.BaseException;
-
-import java.time.Instant;
 
 @Entity
 @Table(name = "deal_info")
@@ -22,8 +16,9 @@ public class DealInfo extends BasePersist {
     @Column
     private Long dealId;
 
-    @Column
-    private Long detailsId;
+    @OneToOne
+    @JoinColumn(name = "details_id")
+    private Details details;
 
     @Column(length = 512)
     private String botLink;
