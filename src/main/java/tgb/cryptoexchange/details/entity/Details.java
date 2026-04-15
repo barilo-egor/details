@@ -26,6 +26,7 @@ public class Details extends BasePersist {
     @Column(name = "REQUISITE")
     private String requisite;
 
+    @Builder.Default
     @OneToMany(mappedBy = "details", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<DealInfo> dealInfos = new ArrayList<>();
 
