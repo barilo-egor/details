@@ -14,15 +14,18 @@ public interface DetailsMapper {
     List<DetailsDto> toDtoList(List<Details> entities);
 
     @Mapping(target = "lastAccessedAt", ignore = true)
+    @Mapping(target = "dealInfos", ignore = true)
     Details toEntity(DetailsDto detailsDto);
 
     @Mapping(target = "lastAccessedAt", ignore = true)
     @Mapping(target = "pid", ignore = true)
+    @Mapping(target = "dealInfos", ignore = true)
     void updateEntityFromDto(DetailsDto dto, @MappingTarget Details entity);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     @Mapping(target = "lastAccessedAt", ignore = true)
     @Mapping(target = "pid", ignore = true)
+    @Mapping(target = "dealInfos", ignore = true)
     void updateEntityFromDtoNotNull(DetailsDto dto, @MappingTarget Details entity);
 
 }
