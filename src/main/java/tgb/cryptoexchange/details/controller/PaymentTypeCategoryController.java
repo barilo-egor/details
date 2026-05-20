@@ -8,6 +8,7 @@ import tgb.cryptoexchange.details.dto.PaymentTypeCategoryDto;
 import tgb.cryptoexchange.details.entity.PaymentTypeCategory;
 import tgb.cryptoexchange.details.interfaces.dto.PaymentTypeCategoryMapper;
 import tgb.cryptoexchange.details.interfaces.service.IPaymentTypeCategoryService;
+import tgb.cryptoexchange.details.kafka.CategoryUnlinkingProducer;
 import tgb.cryptoexchange.web.ApiResponse;
 
 import java.util.List;
@@ -20,10 +21,14 @@ public class PaymentTypeCategoryController extends ApiController {
 
     private final PaymentTypeCategoryMapper mapper;
 
+    private final CategoryUnlinkingProducer categoryUnlinkingProducer;
+
     public PaymentTypeCategoryController(IPaymentTypeCategoryService paymentTypeCategoryService,
-                                         PaymentTypeCategoryMapper mapper) {
+                                         PaymentTypeCategoryMapper mapper,
+                                         CategoryUnlinkingProducer categoryUnlinkingProducer) {
         this.paymentTypeCategoryService = paymentTypeCategoryService;
         this.mapper = mapper;
+        this.categoryUnlinkingProducer = categoryUnlinkingProducer;
     }
 
     @GetMapping
@@ -43,6 +48,9 @@ public class PaymentTypeCategoryController extends ApiController {
         PaymentTypeCategory paymentTypeCategory = new PaymentTypeCategory();
         paymentTypeCategory.setPid(pid);
         paymentTypeCategoryService.delete(paymentTypeCategory);
+        if (categoryUnlinkingProducer != null) {
+            categoryUnlinkingProducer.send(pid);
+        }
         return ResponseEntity.ok().build();
     }
 
