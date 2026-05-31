@@ -42,6 +42,7 @@ public class DealInfoController extends ApiController {
 
     @PostMapping("/save")
     public ResponseEntity<ApiResponse<DealInfoDto>> save(@RequestBody DealInfoDto dealInfoDto) {
+        log.debug("Запрос на сохранение dealInfo {}", dealInfoDto);
         DealInfo saved = dealInfoService.save(dealInfoMapper.toEntity(dealInfoDto));
         return new ResponseEntity<>(ApiResponse.success(dealInfoMapper.toDto(saved)), HttpStatus.OK);
     }
