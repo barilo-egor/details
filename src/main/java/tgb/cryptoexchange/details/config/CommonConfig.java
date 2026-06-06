@@ -12,6 +12,8 @@ import org.springframework.kafka.core.DefaultKafkaProducerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.core.ProducerFactory;
 import org.springframework.scheduling.annotation.EnableAsync;
+import tgb.cryptoexchange.details.kafka.CategoryUnlinkingEvent;
+import tgb.cryptoexchange.details.kafka.CategoryUnlinkingFoundProducerListener;
 import tgb.cryptoexchange.details.kafka.DetailsResponse;
 import tgb.cryptoexchange.details.kafka.DetailsResponseProducerListener;
 
@@ -48,6 +50,25 @@ public class CommonConfig {
         KafkaTemplate<String, DetailsResponse> kafkaTemplate = new KafkaTemplate<>(
                 detailsResponseProducerFactory(kafkaProperties));
         kafkaTemplate.setProducerListener(detailsResponseProducerListener);
+        return kafkaTemplate;
+    }
+
+    @Bean
+    @Profile("!disabled-kafka")
+    public ProducerFactory<String, CategoryUnlinkingEvent> categoryUnlinkingProducerFactory(KafkaProperties kafkaProperties) {
+        Map<String, Object> configProps = new HashMap<>();
+        configProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaProperties.getBootstrapServers());
+        configProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
+        configProps.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, CategoryUnlinkingEvent.KafkaSerializer.class);
+        return new DefaultKafkaProducerFactory<>(configProps);
+    }
+
+    @Bean
+    @Profile("!disabled-kafka")
+    public KafkaTemplate<String, CategoryUnlinkingEvent> categoryUnlinkingKafkaTemplate(CategoryUnlinkingFoundProducerListener categoryUnlinkingFoundProducerListener,
+                                                                                        KafkaProperties kafkaProperties) {
+        KafkaTemplate<String, CategoryUnlinkingEvent> kafkaTemplate = new KafkaTemplate<>(categoryUnlinkingProducerFactory(kafkaProperties));
+        kafkaTemplate.setProducerListener(categoryUnlinkingFoundProducerListener);
         return kafkaTemplate;
     }
 
