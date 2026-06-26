@@ -60,8 +60,9 @@ public class DetailsController extends ApiController {
     @GetMapping("/target")
     public ResponseEntity<ApiResponse<DetailsDto>> getTarget(@RequestParam("detailIds") List<Long> detailIds,
             @RequestParam("amount") Integer amount,
-            @RequestParam("isOn") Boolean isOn) {
-        Details target = detailsService.getTarget(detailIds, amount, isOn);
+            @RequestParam("isOn") Boolean isOn,
+            @RequestParam(required = false, defaultValue = "0") Integer minDealsCount) {
+        Details target = detailsService.getTarget(detailIds, amount, isOn, minDealsCount);
         if (target == null) {
             return new ResponseEntity<>(ApiResponse.success(null), HttpStatus.OK);
         }

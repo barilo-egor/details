@@ -35,6 +35,7 @@ class DetailsRepositoryTest {
         detailWithTarget.setRequisite("Target Req");
         detailWithTarget.setTargetAmount(10000);
         detailWithTarget.setIsOn(true);
+        detailWithTarget.setMinDealsCount(1);
         entityManager.persist(detailWithTarget);
 
         oldestDetail = new Details();
@@ -42,6 +43,7 @@ class DetailsRepositoryTest {
         oldestDetail.setLastAccessedAt(Instant.now().minusSeconds(3600));
         oldestDetail.setTargetAmount(0);
         oldestDetail.setIsOn(true);
+        oldestDetail.setMinDealsCount(0);
         entityManager.persist(oldestDetail);
 
         Details freshDetail = new Details();
@@ -49,6 +51,7 @@ class DetailsRepositoryTest {
         freshDetail.setLastAccessedAt(Instant.now());
         freshDetail.setTargetAmount(0);
         freshDetail.setIsOn(true);
+        freshDetail.setMinDealsCount(0);
         entityManager.persist(freshDetail);
 
         entityManager.flush();
@@ -75,17 +78,17 @@ class DetailsRepositoryTest {
     }
 
     @Test
-    void findAllByPidInAndTargetAmountNotEmpty_ShouldReturnLockedEntities() {
+    void findAllByPidInAndTargetAmountNotEmpty_AndMinDealsCountLessOrEqual_ShouldReturnLockedEntities() {
         List<Long> pids = List.of(detailWithTarget.getPid(), oldestDetail.getPid());
 
-        List<Details> result = detailsRepository.findAllByPidInAndTargetAmountNotEmpty(pids, true);
+        List<Details> result = detailsRepository.findAllByPidInAndTargetAmountNotEmptyAndMinDealsCountLessOrEqual(pids, true, 1);
 
         assertThat(result).hasSize(1);
         assertThat(result.getFirst().getPid()).isEqualTo(detailWithTarget.getPid());
     }
 
     @Test
-    void findOldestAvailableDetail_ShouldReturnOldestByAccessTime() {
+    void findOldestAvailableDetail_ShouldReturnOldestByAccessTimeByIsOnAndDealsCountGreaterThan() {
         List<Long> ids = List.of(oldestDetail.getPid(), 3L);
 
         Optional<Details> result = detailsRepository.findOldestAvailableDetail(ids, true);

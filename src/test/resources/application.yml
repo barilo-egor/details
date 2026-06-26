@@ -3,3 +3,6 @@ spring:
     name: details-test
   config:
     import: ""
+  cloud:
+    config:
+      enabled: false

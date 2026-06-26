@@ -48,7 +48,7 @@ public class Details extends BasePersist {
     /**
      * Минимальное количество сделок, которое необходимо для получения реквизита
      */
-    @Column(nullable = false, columnDefinition = "INTEGER DEFAULT 0")
+    @Column(nullable = false, columnDefinition = "INTEGER DEFAULT 1")
     private Integer minDealsCount;
 
     @PrePersist

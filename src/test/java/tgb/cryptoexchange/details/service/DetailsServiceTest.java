@@ -71,11 +71,11 @@ class DetailsServiceTest {
 
     @Test
     void getTarget_ShouldReserveAndReturn_WhenConditionsMet() {
-        when(detailsRepository.findAllByPidInAndTargetAmountNotEmpty(anyList(), eq(true)))
+        when(detailsRepository.findAllByPidInAndTargetAmountNotEmptyAndMinDealsCountLessOrEqual(anyList(), eq(true), eq(0)))
                 .thenReturn(List.of(testDetails));
         when(detailsRepository.save(any())).thenAnswer(i -> i.getArguments()[0]);
 
-        Details result = detailsService.getTarget(List.of(1L), 500, true);
+        Details result = detailsService.getTarget(List.of(1L), 500, true, 0);
 
         assertNotNull(result);
         assertEquals(500, result.getReserveAmount());
@@ -84,10 +84,10 @@ class DetailsServiceTest {
 
     @Test
     void getTarget_ShouldReturnNull_WhenAmountIsOutOfRange() {
-        when(detailsRepository.findAllByPidInAndTargetAmountNotEmpty(anyList(), eq(true)))
+        when(detailsRepository.findAllByPidInAndTargetAmountNotEmptyAndMinDealsCountLessOrEqual(anyList(), eq(true), eq(0)))
                 .thenReturn(List.of(testDetails));
 
-        Details result = detailsService.getTarget(List.of(1L), 10000, true);
+        Details result = detailsService.getTarget(List.of(1L), 10000, true, 0);
 
         assertNull(result);
     }
@@ -95,10 +95,10 @@ class DetailsServiceTest {
     @Test
     void getTarget_ShouldReturnNull_WhenNoCapacityLeft() {
         testDetails.setReceivedAmount(9800);
-        when(detailsRepository.findAllByPidInAndTargetAmountNotEmpty(anyList(), eq(true)))
+        when(detailsRepository.findAllByPidInAndTargetAmountNotEmptyAndMinDealsCountLessOrEqual(anyList(), eq(true), eq(0)))
                 .thenReturn(List.of(testDetails));
 
-        Details result = detailsService.getTarget(List.of(1L), 500, true);
+        Details result = detailsService.getTarget(List.of(1L), 500, true, 0);
 
         assertNull(result);
     }

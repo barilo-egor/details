@@ -28,10 +28,13 @@ public interface DetailsRepository extends BaseRepository<Details> {
     @Query("from Details where targetAmount is not null and targetAmount > 0")
     Page<Details> getWithNotEmptyTargetAmount(Pageable pageable);
 
-    @Query("from Details d where d.pid in :pids and (d.isOn = :isOn or (:isOn = false and d.isOn is null)) and d.targetAmount is not null and d.targetAmount > 0")
+    @Query("from Details d where d.pid in :pids and (d.isOn = :isOn or (:isOn = false and d.isOn is null)) " +
+            "and d.targetAmount is not null and d.targetAmount > 0 " +
+            "and d.minDealsCount <= :dealsCount")
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @QueryHints({@QueryHint(name = "jakarta.persistence.lock.timeout", value = "5000")})
-    List<Details> findAllByPidInAndTargetAmountNotEmpty(@Param("pids") List<Long> pids, @Param("isOn") Boolean isOn);
+    List<Details> findAllByPidInAndTargetAmountNotEmptyAndMinDealsCountLessOrEqual(@Param("pids") List<Long> pids, @Param("isOn") Boolean isOn,
+                                                                                   Integer dealsCount);
 
     Page<Details> findAllByPidIn(List<Long> pids, Pageable pageable);
 
