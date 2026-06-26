@@ -45,6 +45,9 @@ public class Details extends BasePersist {
 
     private Instant lastAccessedAt;
 
+    @Column(nullable = false, columnDefinition = "INTEGER DEFAULT 0")
+    private Integer minDealsCount;
+
     @PrePersist
     protected void onCreate() {
         if (this.lastAccessedAt == null) {
