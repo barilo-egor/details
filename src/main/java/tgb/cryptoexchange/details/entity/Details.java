@@ -45,6 +45,9 @@ public class Details extends BasePersist {
 
     private Instant lastAccessedAt;
 
+    /**
+     * Минимальное количество сделок, которое необходимо для получения реквизита
+     */
     @Column(nullable = false, columnDefinition = "INTEGER DEFAULT 0")
     private Integer minDealsCount;
 
