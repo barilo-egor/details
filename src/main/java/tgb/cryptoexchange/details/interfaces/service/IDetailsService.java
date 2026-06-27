@@ -17,7 +17,7 @@ public interface IDetailsService extends IBasePersistService<Details> {
 
     Details findById(Long pid);
 
-    Details getTarget(List<Long> detailIds, Integer amount, Boolean isOn);
+    Details getTarget(List<Long> detailIds, Integer amount, Boolean isOn, Integer dealsCount);
 
     Details getNotTargetRequisite(PaymentTypeDto paymentType, Boolean isOn);
 

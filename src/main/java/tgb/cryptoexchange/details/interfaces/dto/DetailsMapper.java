@@ -15,6 +15,7 @@ public interface DetailsMapper {
 
     @Mapping(target = "lastAccessedAt", ignore = true)
     @Mapping(target = "dealInfos", ignore = true)
+    @Mapping(target = "isOn", ignore = true)
     Details toEntity(DetailsDto detailsDto);
 
     @Mapping(target = "lastAccessedAt", ignore = true)

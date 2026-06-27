@@ -31,6 +31,7 @@ class DetailsRepositoryTest {
     void updateRequisiteByPid() {
         Details details = new Details();
         details.setRequisite("Old Requisite");
+        details.setMinDealsCount(0);
         details = detailsRepository.save(details);
 
         detailsRepository.updateRequisiteByPid("New Requisite", details.getPid());
@@ -46,10 +47,13 @@ class DetailsRepositoryTest {
     void getWithNotEmptyTargetAmount() {
         Details d1 = new Details();
         d1.setTargetAmount(1000);
+        d1.setMinDealsCount(0);
         Details d2 = new Details();
         d2.setTargetAmount(0);
+        d2.setMinDealsCount(0);
         Details d3 = new Details();
         d3.setTargetAmount(null);
+        d3.setMinDealsCount(0);
         detailsRepository.saveAll(List.of(d1, d2, d3));
         Pageable pageable = PageRequest.of(0, 10);
         Page<Details> result = detailsRepository.getWithNotEmptyTargetAmount(pageable);
@@ -62,11 +66,13 @@ class DetailsRepositoryTest {
     @DisplayName("Поиск старейшего доступного реквизита")
     void findOldestAvailableDetail() {
         Details old = new Details();
+        old.setMinDealsCount(0);
         old.setTargetAmount(0);
         old.setIsOn(true);
         old.setLastAccessedAt(Instant.now().minusSeconds(100));
 
         Details fresh = new Details();
+        fresh.setMinDealsCount(0);
         fresh.setTargetAmount(0);
         fresh.setLastAccessedAt(Instant.now());
 
@@ -81,16 +87,18 @@ class DetailsRepositoryTest {
 
     @Test
     @DisplayName("Поиск по списку PID с фильтром targetAmount")
-    void findAllByPidInAndTargetAmountNotEmpty() {
+    void findAllByPidInAndTargetAmountNotEmptyAndMinDealsCountLessOrEqual() {
         Details d1 = new Details();
         d1.setTargetAmount(500);
         d1.setIsOn(true);
+        d1.setMinDealsCount(0);
         Details d2 = new Details();
         d2.setTargetAmount(0);
+        d2.setMinDealsCount(0);
         List<Details> saved = detailsRepository.saveAllAndFlush(List.of(d1, d2));
         List<Long> pids = saved.stream().map(Details::getPid).toList();
 
-        List<Details> result = detailsRepository.findAllByPidInAndTargetAmountNotEmpty(pids, true);
+        List<Details> result = detailsRepository.findAllByPidInAndTargetAmountNotEmptyAndMinDealsCountLessOrEqual(pids, true, 0);
 
         assertThat(result).hasSize(1);
         assertThat(result.getFirst().getPid()).isEqualTo(pids.getFirst());
