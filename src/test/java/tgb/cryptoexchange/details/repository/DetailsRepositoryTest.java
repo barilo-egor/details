@@ -29,6 +29,10 @@ class DetailsRepositoryTest {
 
     private Details oldestDetail;
 
+    private Details freshDetail;
+
+    private Details afterFreshDetail;
+
     @BeforeEach
     void setUp() {
         detailWithTarget = new Details();
@@ -36,6 +40,7 @@ class DetailsRepositoryTest {
         detailWithTarget.setTargetAmount(10000);
         detailWithTarget.setIsOn(true);
         detailWithTarget.setMinDealsCount(1);
+        detailWithTarget.setPriority(100);
         entityManager.persist(detailWithTarget);
 
         oldestDetail = new Details();
@@ -46,13 +51,22 @@ class DetailsRepositoryTest {
         oldestDetail.setMinDealsCount(0);
         entityManager.persist(oldestDetail);
 
-        Details freshDetail = new Details();
+        freshDetail = new Details();
         freshDetail.setRequisite("Fresh Req");
         freshDetail.setLastAccessedAt(Instant.now());
         freshDetail.setTargetAmount(0);
         freshDetail.setIsOn(true);
         freshDetail.setMinDealsCount(0);
         entityManager.persist(freshDetail);
+
+        afterFreshDetail = new Details();
+        afterFreshDetail.setRequisite("After Fresh Req");
+        afterFreshDetail.setLastAccessedAt(Instant.now());
+        afterFreshDetail.setTargetAmount(0);
+        afterFreshDetail.setIsOn(true);
+        afterFreshDetail.setMinDealsCount(0);
+        afterFreshDetail.setPriority(1);
+        entityManager.persist(afterFreshDetail);
 
         entityManager.flush();
     }
@@ -89,12 +103,22 @@ class DetailsRepositoryTest {
 
     @Test
     void findOldestAvailableDetail_ShouldReturnOldestByAccessTimeByIsOnAndDealsCountGreaterThan() {
-        List<Long> ids = List.of(oldestDetail.getPid(), 3L);
+        List<Long> ids = List.of(oldestDetail.getPid(), freshDetail.getPid());
 
         Optional<Details> result = detailsRepository.findOldestAvailableDetail(ids, true);
 
         assertThat(result).isPresent();
         assertThat(result.get().getRequisite()).isEqualTo("Oldest Req");
+    }
+
+    @Test
+    void findOldestAvailableDetail_ShouldReturnOldestByPriorityByAccessTimeByIsOnAndDealsCountGreaterThan() {
+        List<Long> ids = List.of(freshDetail.getPid(), afterFreshDetail.getPid());
+
+        Optional<Details> result = detailsRepository.findOldestAvailableDetail(ids, true);
+
+        assertThat(result).isPresent();
+        assertThat(result.get().getRequisite()).isEqualTo("After Fresh Req");
     }
 
     @Test

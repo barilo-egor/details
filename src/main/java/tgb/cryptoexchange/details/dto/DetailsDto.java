@@ -34,4 +34,6 @@ public class DetailsDto implements Serializable {
     private Integer rangeTo;
 
     private Integer minDealsCount;
+
+    private Integer priority;
 }

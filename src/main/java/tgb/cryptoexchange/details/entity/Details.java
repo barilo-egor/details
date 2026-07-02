@@ -51,6 +51,12 @@ public class Details extends BasePersist {
     @Column(nullable = false, columnDefinition = "INTEGER DEFAULT 1")
     private Integer minDealsCount;
 
+    /**
+     * Приоритет выдачи реквизита
+     */
+    @Column(name = "priority_level", columnDefinition = "integer default 0 check (priority_level >= 0 and priority_level <= 100)")
+    private Integer priority;
+
     @PrePersist
     protected void onCreate() {
         if (this.lastAccessedAt == null) {
