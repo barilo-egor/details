@@ -33,7 +33,9 @@ public interface DetailsRepository extends BaseRepository<Details> {
             "and d.minDealsCount <= :dealsCount " +
             "order by d.priority desc, d.lastAccessedAt ASC LIMIT 1")
     @Lock(LockModeType.PESSIMISTIC_WRITE)
-    @QueryHints({@QueryHint(name = "jakarta.persistence.lock.timeout", value = "5000")})
+    @QueryHints({
+            //Skip lock пропустит уже заблокированную строку и возьмет следующую
+            @QueryHint(name = "jakarta.persistence.lock.timeout", value = "-2")})
     List<Details> findAllByPidInAndTargetAmountNotEmptyAndMinDealsCountLessOrEqual(@Param("pids") List<Long> pids, @Param("isOn") Boolean isOn,
                                                                                    Integer dealsCount);
 
