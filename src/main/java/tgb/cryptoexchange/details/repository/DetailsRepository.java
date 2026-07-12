@@ -30,14 +30,20 @@ public interface DetailsRepository extends BaseRepository<Details> {
 
     @Query("from Details d where d.pid in :pids and (d.isOn = :isOn or (:isOn = false and d.isOn is null)) " +
             "and d.targetAmount is not null and d.targetAmount > 0 " +
-            "and d.minDealsCount <= :dealsCount")
+            "and d.minDealsCount <= :dealsCount " +
+            "order by d.priority desc, d.lastAccessedAt ASC LIMIT 1")
     @Lock(LockModeType.PESSIMISTIC_WRITE)
-    @QueryHints({@QueryHint(name = "jakarta.persistence.lock.timeout", value = "5000")})
+    @QueryHints({
+            //Skip lock пропустит уже заблокированную строку и возьмет следующую
+            @QueryHint(name = "jakarta.persistence.lock.timeout", value = "-2")})
     List<Details> findAllByPidInAndTargetAmountNotEmptyAndMinDealsCountLessOrEqual(@Param("pids") List<Long> pids, @Param("isOn") Boolean isOn,
                                                                                    Integer dealsCount);
 
     Page<Details> findAllByPidIn(List<Long> pids, Pageable pageable);
 
+    /**
+     * Приоритет выдачи - сначала высший приоритет, затем самые старые
+     */
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @QueryHints({
             //Skip lock пропустит уже заблокированную строку и возьмет следующую
@@ -46,7 +52,7 @@ public interface DetailsRepository extends BaseRepository<Details> {
             "WHERE d.pid IN :ids " +
             "AND (d.isOn = :isOn OR (:isOn = false AND d.isOn IS NULL)) " +
             "AND (d.targetAmount IS NULL OR d.targetAmount = 0) " +
-            "ORDER BY d.lastAccessedAt ASC LIMIT 1")
+            "ORDER BY d.priority DESC, d.lastAccessedAt ASC LIMIT 1")
     Optional<Details> findOldestAvailableDetail(@Param("ids") List<Long> ids, @Param("isOn") Boolean isOn);
 
     @Override
