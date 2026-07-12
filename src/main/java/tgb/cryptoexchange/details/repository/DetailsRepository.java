@@ -31,7 +31,7 @@ public interface DetailsRepository extends BaseRepository<Details> {
     @Query("from Details d where d.pid in :pids and (d.isOn = :isOn or (:isOn = false and d.isOn is null)) " +
             "and d.targetAmount is not null and d.targetAmount > 0 " +
             "and d.minDealsCount <= :dealsCount " +
-            "order by d.priority desc")
+            "order by d.priority desc, d.lastAccessedAt ASC LIMIT 1")
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @QueryHints({@QueryHint(name = "jakarta.persistence.lock.timeout", value = "5000")})
     List<Details> findAllByPidInAndTargetAmountNotEmptyAndMinDealsCountLessOrEqual(@Param("pids") List<Long> pids, @Param("isOn") Boolean isOn,

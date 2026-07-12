@@ -59,6 +59,7 @@ public class DetailsService extends BasePersistService<Details> implements IDeta
                 int reserveAmount = Objects.nonNull(details.getReserveAmount()) ? details.getReserveAmount() : 0;
                 if (targetAmount - receiveAmount - reserveAmount >= amount && details.isInRange(amount)) {
                     details.setReserveAmount(reserveAmount + amount);
+                    details.setLastAccessedAt(Instant.now());
                     return detailsRepository.save(details);
                 }
             }
