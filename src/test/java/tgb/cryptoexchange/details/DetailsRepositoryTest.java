@@ -104,4 +104,47 @@ class DetailsRepositoryTest {
         assertThat(result.getFirst().getPid()).isEqualTo(pids.getFirst());
     }
 
+    @Test
+    @DisplayName("Возвращает все подходящие записи")
+    void findAllByPidInAndTargetAmountNotEmptyAndMinDealsCountLessOrEqual_ShouldReturnAllMatchingDetails() {
+        Details d1 = new Details();
+        d1.setTargetAmount(1000);
+        d1.setMinDealsCount(0);
+        d1.setIsOn(true);
+        d1.setPriority(1);
+        d1.setLastAccessedAt(Instant.now());
+
+        Details d2 = new Details();
+        d2.setTargetAmount(2000);
+        d2.setMinDealsCount(0);
+        d2.setIsOn(true);
+        d2.setPriority(1);
+        d2.setLastAccessedAt(Instant.now());
+
+        Details d3 = new Details();
+        d3.setTargetAmount(3000);
+        d3.setMinDealsCount(0);
+        d3.setIsOn(true);
+        d3.setPriority(1);
+        d3.setLastAccessedAt(Instant.now());
+
+        Details d4 = new Details();
+        d4.setTargetAmount(0);
+        d4.setMinDealsCount(0);
+        d4.setIsOn(true);
+
+        List<Details> saved = detailsRepository.saveAllAndFlush(List.of(d1, d2, d3, d4));
+        List<Long> pids = saved.stream().map(Details::getPid).toList();
+
+        List<Details> result = detailsRepository.findAllByPidInAndTargetAmountNotEmptyAndMinDealsCountLessOrEqual(
+                pids, true, 0);
+
+        assertThat(result).hasSize(3);
+        assertThat(result).extracting(Details::getPid)
+                .containsExactlyInAnyOrder(d1.getPid(), d2.getPid(), d3.getPid());
+
+        assertThat(result).extracting(Details::getPid)
+                .doesNotContain(d4.getPid());
+    }
+
 }
