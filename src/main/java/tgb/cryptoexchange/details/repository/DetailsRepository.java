@@ -31,7 +31,7 @@ public interface DetailsRepository extends BaseRepository<Details> {
     @Query("from Details d where d.pid in :pids and (d.isOn = :isOn or (:isOn = false and d.isOn is null)) " +
             "and d.targetAmount is not null and d.targetAmount > 0 " +
             "and d.minDealsCount <= :dealsCount " +
-            "order by d.priority desc, d.lastAccessedAt ASC LIMIT 1")
+            "order by d.priority desc, d.lastAccessedAt ASC")
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @QueryHints({
             //Skip lock пропустит уже заблокированную строку и возьмет следующую
