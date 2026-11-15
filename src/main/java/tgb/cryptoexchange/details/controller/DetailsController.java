@@ -72,9 +72,10 @@ public class DetailsController extends ApiController {
 
     @PostMapping("/non-target")
     public ResponseEntity<ApiResponse<DetailsDto>> getNonTargetRequisite(@RequestBody PaymentTypeDto paymentTypeDto,
-            @RequestParam("isOn") Boolean isOn) {
-        log.debug("Поиск non-target реквизитов: paymentType = {} isOn = {}", paymentTypeDto, isOn);
-        Details nonTarget = detailsService.getNotTargetRequisite(paymentTypeDto, isOn);
+            @RequestParam("isOn") Boolean isOn,
+            @RequestParam(required = false) Integer minDealsCount) {
+        log.debug("Поиск non-target реквизитов: paymentType = {} isOn = {} minDealsCount = {}", paymentTypeDto, isOn, minDealsCount);
+        Details nonTarget = detailsService.getNotTargetRequisite(paymentTypeDto, isOn, minDealsCount);
         DetailsDto dto = detailsMapper.toDto(nonTarget);
         return new ResponseEntity<>(ApiResponse.success(dto), HttpStatus.OK);
     }

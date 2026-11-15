@@ -19,7 +19,7 @@ public interface IDetailsService extends IBasePersistService<Details> {
 
     Details getTarget(List<Long> detailIds, Integer amount, Boolean isOn, Integer dealsCount);
 
-    Details getNotTargetRequisite(PaymentTypeDto paymentType, Boolean isOn);
+    Details getNotTargetRequisite(PaymentTypeDto paymentType, Boolean isOn, Integer dealsCount);
 
     Page<Details> findAll(List<Long> detailsPids, boolean hasTargetAmount, Pageable pageable);
 

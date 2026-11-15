@@ -52,9 +52,9 @@ class DetailsServiceTest {
         PaymentTypeDto dto = new PaymentTypeDto();
         dto.setDetails(List.of(1L));
 
-        when(detailsRepository.findOldestAvailableDetail(anyList(), eq(true))).thenReturn(Optional.of(testDetails));
+        when(detailsRepository.findOldestAvailableDetail(anyList(), eq(true), eq(5))).thenReturn(Optional.of(testDetails));
 
-        Details result = detailsService.getNotTargetRequisite(dto, true);
+        Details result = detailsService.getNotTargetRequisite(dto, true, 5);
 
         assertEquals("Test Requisite", result.getRequisite());
         assertNotNull(testDetails.getLastAccessedAt());
@@ -64,9 +64,9 @@ class DetailsServiceTest {
     void getNotTargetRequisite_ShouldThrowException_WhenNotFound() {
         PaymentTypeDto dto = new PaymentTypeDto();
         dto.setName("Card");
-        when(detailsRepository.findOldestAvailableDetail(any(), eq(true))).thenReturn(Optional.empty());
+        when(detailsRepository.findOldestAvailableDetail(any(), eq(true), any())).thenReturn(Optional.empty());
 
-        assertThrows(EntityNotFoundException.class, () -> detailsService.getNotTargetRequisite(dto, true));
+        assertThrows(EntityNotFoundException.class, () -> detailsService.getNotTargetRequisite(dto, true, 5));
     }
 
     @Test

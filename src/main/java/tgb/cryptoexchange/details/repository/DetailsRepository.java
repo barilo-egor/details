@@ -52,8 +52,10 @@ public interface DetailsRepository extends BaseRepository<Details> {
             "WHERE d.pid IN :ids " +
             "AND (d.isOn = :isOn OR (:isOn = false AND d.isOn IS NULL)) " +
             "AND (d.targetAmount IS NULL OR d.targetAmount = 0) " +
+            "AND (:dealsCount IS NULL OR d.minDealsCount <= :dealsCount) " +
             "ORDER BY d.priority DESC, d.lastAccessedAt ASC LIMIT 1")
-    Optional<Details> findOldestAvailableDetail(@Param("ids") List<Long> ids, @Param("isOn") Boolean isOn);
+    Optional<Details> findOldestAvailableDetail(@Param("ids") List<Long> ids, @Param("isOn") Boolean isOn,
+                                                @Param("dealsCount") Integer dealsCount);
 
     @Override
     @Lock(LockModeType.PESSIMISTIC_WRITE)
