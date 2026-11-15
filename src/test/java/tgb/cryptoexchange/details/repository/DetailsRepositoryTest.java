@@ -105,7 +105,7 @@ class DetailsRepositoryTest {
     void findOldestAvailableDetail_ShouldReturnOldestByAccessTimeByIsOnAndDealsCountGreaterThan() {
         List<Long> ids = List.of(oldestDetail.getPid(), freshDetail.getPid());
 
-        Optional<Details> result = detailsRepository.findOldestAvailableDetail(ids, true);
+        Optional<Details> result = detailsRepository.findOldestAvailableDetail(ids, true, null);
 
         assertThat(result).isPresent();
         assertThat(result.get().getRequisite()).isEqualTo("Oldest Req");
@@ -115,10 +115,59 @@ class DetailsRepositoryTest {
     void findOldestAvailableDetail_ShouldReturnOldestByPriorityByAccessTimeByIsOnAndDealsCountGreaterThan() {
         List<Long> ids = List.of(freshDetail.getPid(), afterFreshDetail.getPid());
 
-        Optional<Details> result = detailsRepository.findOldestAvailableDetail(ids, true);
+        Optional<Details> result = detailsRepository.findOldestAvailableDetail(ids, true, null);
 
         assertThat(result).isPresent();
         assertThat(result.get().getRequisite()).isEqualTo("After Fresh Req");
+    }
+
+    @Test
+    void findOldestAvailableDetail_ShouldSkipDetailWithMinDealsCountGreaterThanDealsCount() {
+        oldestDetail.setMinDealsCount(10);
+        entityManager.persistAndFlush(oldestDetail);
+        List<Long> ids = List.of(oldestDetail.getPid(), freshDetail.getPid());
+
+        Optional<Details> result = detailsRepository.findOldestAvailableDetail(ids, true, 5);
+
+        assertThat(result).isPresent();
+        assertThat(result.get().getRequisite()).isEqualTo("Fresh Req");
+    }
+
+    @Test
+    void findOldestAvailableDetail_ShouldReturnDetailWithMinDealsCountEqualToDealsCount() {
+        oldestDetail.setMinDealsCount(10);
+        entityManager.persistAndFlush(oldestDetail);
+        List<Long> ids = List.of(oldestDetail.getPid(), freshDetail.getPid());
+
+        Optional<Details> result = detailsRepository.findOldestAvailableDetail(ids, true, 10);
+
+        assertThat(result).isPresent();
+        assertThat(result.get().getRequisite()).isEqualTo("Oldest Req");
+    }
+
+    @Test
+    void findOldestAvailableDetail_ShouldReturnEmpty_WhenAllDetailsRequireMoreDeals() {
+        oldestDetail.setMinDealsCount(10);
+        freshDetail.setMinDealsCount(10);
+        entityManager.persistAndFlush(oldestDetail);
+        entityManager.persistAndFlush(freshDetail);
+        List<Long> ids = List.of(oldestDetail.getPid(), freshDetail.getPid());
+
+        Optional<Details> result = detailsRepository.findOldestAvailableDetail(ids, true, 5);
+
+        assertThat(result).isEmpty();
+    }
+
+    @Test
+    void findOldestAvailableDetail_ShouldIgnoreMinDealsCount_WhenDealsCountIsNull() {
+        oldestDetail.setMinDealsCount(10);
+        entityManager.persistAndFlush(oldestDetail);
+        List<Long> ids = List.of(oldestDetail.getPid(), freshDetail.getPid());
+
+        Optional<Details> result = detailsRepository.findOldestAvailableDetail(ids, true, null);
+
+        assertThat(result).isPresent();
+        assertThat(result.get().getRequisite()).isEqualTo("Oldest Req");
     }
 
     @Test

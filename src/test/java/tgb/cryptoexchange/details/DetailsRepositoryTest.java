@@ -79,7 +79,7 @@ class DetailsRepositoryTest {
         List<Details> saved = detailsRepository.saveAllAndFlush(List.of(old, fresh));
         List<Long> pids = saved.stream().map(Details::getPid).toList();
 
-        Optional<Details> result = detailsRepository.findOldestAvailableDetail(pids, true);
+        Optional<Details> result = detailsRepository.findOldestAvailableDetail(pids, true, null);
 
         assertThat(result).isPresent();
         assertThat(result.get().getPid()).isEqualTo(saved.getFirst().getPid());

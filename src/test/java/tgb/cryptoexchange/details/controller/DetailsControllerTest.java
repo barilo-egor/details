@@ -116,6 +116,40 @@ class DetailsControllerTest {
     }
 
     @Test
+    void getNonTargetRequisite_ShouldPassMinDealsCountToService() throws Exception {
+        Details entity = new Details();
+        DetailsDto dto = new DetailsDto();
+        dto.setPid(7L);
+        when(detailsService.getNotTargetRequisite(any(), eq(true), eq(5))).thenReturn(entity);
+        when(detailsMapper.toDto(entity)).thenReturn(dto);
+
+        mockMvc.perform(post("/details/non-target")
+                        .param("isOn", "true")
+                        .param("minDealsCount", "5")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"pid\":1,\"name\":\"Card\",\"details\":[1]}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.pid").value(7));
+
+        verify(detailsService).getNotTargetRequisite(any(), eq(true), eq(5));
+    }
+
+    @Test
+    void getNonTargetRequisite_ShouldPassNullMinDealsCount_WhenParamIsAbsent() throws Exception {
+        Details entity = new Details();
+        when(detailsService.getNotTargetRequisite(any(), eq(true), isNull())).thenReturn(entity);
+        when(detailsMapper.toDto(entity)).thenReturn(new DetailsDto());
+
+        mockMvc.perform(post("/details/non-target")
+                        .param("isOn", "true")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"pid\":1,\"name\":\"Card\",\"details\":[1]}"))
+                .andExpect(status().isOk());
+
+        verify(detailsService).getNotTargetRequisite(any(), eq(true), isNull());
+    }
+
+    @Test
     void handleEntityNotFound_ShouldReturn404() throws Exception {
         when(detailsService.findById(999L)).thenThrow(new EntityNotFoundException("Not found"));
 
